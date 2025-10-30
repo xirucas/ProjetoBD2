@@ -1,0 +1,235 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Check-ins{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Check-ins dos Membros</h1>
+    <div class="d-flex gap-2">
+        <button class="btn btn-success">Check-in Manual</button>
+        <button class="btn btn-info">Relatório</button>
+    </div>
+</div>
+
+<!-- Estatísticas do Dia -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <h5>Check-ins Hoje</h5>
+                <h2>47</h2>
+                <small>+8 em relação a ontem</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <h5>Membros Ativos</h5>
+                <h2>28</h2>
+                <small>Ainda no ginásio</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <h5>Pico do Dia</h5>
+                <h2>18:30</h2>
+                <small>12 check-ins</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <h5>Taxa de Ocupação</h5>
+                <h2>68%</h2>
+                <small>Capacidade atual</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filtros -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <input type="date" class="form-control" value="2024-10-30">
+    </div>
+    <div class="col-md-3">
+        <select class="form-select">
+            <option>Todos os Status</option>
+            <option>Check-in</option>
+            <option>Check-out</option>
+            <option>Ainda no ginásio</option>
+        </select>
+    </div>
+    <div class="col-md-6">
+        <input type="text" class="form-control" placeholder="Buscar por nome ou ID do membro...">
+    </div>
+</div>
+
+<!-- Check-ins em Tempo Real -->
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5>Check-ins em Tempo Real</h5>
+        <span class="badge bg-success">Atualizando automaticamente</span>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="alert alert-success" role="alert">
+                    <strong>João Silva (ID: 1001)</strong><br>
+                    <small>Check-in: 14:32 | Plano: Premium</small>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="alert alert-info" role="alert">
+                    <strong>Maria Santos (ID: 1002)</strong><br>
+                    <small>Check-in: 14:28 | Plano: Básico</small>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="alert alert-warning" role="alert">
+                    <strong>Pedro Oliveira (ID: 1003)</strong><br>
+                    <small>Check-out: 14:25 | Duração: 1h 45min</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Histórico de Check-ins -->
+<div class="card">
+    <div class="card-header">
+        <h5>Histórico de Check-ins - Hoje (30/10/2024)</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID Check-in</th>
+                        <th>Membro</th>
+                        <th>ID Membro</th>
+                        <th>Plano</th>
+                        <th>Check-in</th>
+                        <th>Check-out</th>
+                        <th>Duração</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>C2024-001</td>
+                        <td>Ana Costa</td>
+                        <td>1001</td>
+                        <td><span class="badge bg-warning">Premium</span></td>
+                        <td>06:15</td>
+                        <td>07:45</td>
+                        <td>1h 30min</td>
+                        <td><span class="badge bg-secondary">Concluído</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary">Ver</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>C2024-002</td>
+                        <td>Carlos Silva</td>
+                        <td>1005</td>
+                        <td><span class="badge bg-primary">Básico</span></td>
+                        <td>07:30</td>
+                        <td>09:15</td>
+                        <td>1h 45min</td>
+                        <td><span class="badge bg-secondary">Concluído</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary">Ver</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>C2024-003</td>
+                        <td>Fernanda Lopes</td>
+                        <td>1012</td>
+                        <td><span class="badge bg-danger">VIP</span></td>
+                        <td>08:00</td>
+                        <td>10:30</td>
+                        <td>2h 30min</td>
+                        <td><span class="badge bg-secondary">Concluído</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary">Ver</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>C2024-004</td>
+                        <td>Miguel Torres</td>
+                        <td>1018</td>
+                        <td><span class="badge bg-primary">Básico</span></td>
+                        <td>09:45</td>
+                        <td>-</td>
+                        <td>4h 47min</td>
+                        <td><span class="badge bg-success">No ginásio</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-warning">Check-out</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>C2024-005</td>
+                        <td>Sofia Reis</td>
+                        <td>1025</td>
+                        <td><span class="badge bg-warning">Premium</span></td>
+                        <td>11:20</td>
+                        <td>12:50</td>
+                        <td>1h 30min</td>
+                        <td><span class="badge bg-secondary">Concluído</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary">Ver</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>C2024-006</td>
+                        <td>João Ferreira</td>
+                        <td>1030</td>
+                        <td><span class="badge bg-danger">VIP</span></td>
+                        <td>13:15</td>
+                        <td>-</td>
+                        <td>1h 17min</td>
+                        <td><span class="badge bg-success">No ginásio</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-warning">Check-out</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>C2024-007</td>
+                        <td>Maria Santos</td>
+                        <td>1002</td>
+                        <td><span class="badge bg-primary">Básico</span></td>
+                        <td>14:28</td>
+                        <td>-</td>
+                        <td>4min</td>
+                        <td><span class="badge bg-success">No ginásio</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-warning">Check-out</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Paginação -->
+        <nav aria-label="Navegação das páginas">
+            <ul class="pagination justify-content-center">
+                <li class="page-item disabled">
+                    <a class="page-link" href="#" tabindex="-1">Anterior</a>
+                </li>
+                <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                <li class="page-item"><a class="page-link" href="#">2</a></li>
+                <li class="page-item"><a class="page-link" href="#">3</a></li>
+                <li class="page-item">
+                    <a class="page-link" href="#">Próximo</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</div>
+{% endblock %}

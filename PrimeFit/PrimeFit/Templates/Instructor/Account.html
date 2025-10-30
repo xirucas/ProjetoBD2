@@ -1,0 +1,244 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Minha Conta - Instrutor{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Minha Conta</h1>
+    <button class="btn btn-primary">Editar Perfil</button>
+</div>
+
+<!-- Informações do Instrutor -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <img src="https://via.placeholder.com/150" class="rounded-circle mb-3" alt="Foto do Instrutor">
+                <h4>Ana Ferreira</h4>
+                <p class="text-muted">Instrutor ID: 15</p>
+                <span class="badge bg-success">Ativo</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5>Informações Pessoais</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Nome Completo:</strong> Ana Sofia Ferreira</p>
+                        <p><strong>Email:</strong> ana.ferreira@primefit.com</p>
+                        <p><strong>Telefone:</strong> +351 912 345 678</p>
+                        <p><strong>Data de Nascimento:</strong> 15/03/1985</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Especialidades:</strong> Yoga, Pilates, Zumba</p>
+                        <p><strong>Certificações:</strong> YTT-200, Pilates Mat</p>
+                        <p><strong>Data de Admissão:</strong> 10/01/2023</p>
+                        <p><strong>Status:</strong> <span class="badge bg-success">Ativo</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Estatísticas do Instrutor -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <h5>Aulas este Mês</h5>
+                <h2>42</h2>
+                <small>+5 vs mês anterior</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <h5>Alunos Atendidos</h5>
+                <h2>156</h2>
+                <small>Outubro 2024</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <h5>Avaliação Média</h5>
+                <h2>4.8</h2>
+                <small>⭐⭐⭐⭐⭐</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <h5>Horas Trabalhadas</h5>
+                <h2>84h</h2>
+                <small>Este mês</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Horário da Semana -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5>Meu Horário - Semana Atual</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Horário</th>
+                        <th>Segunda</th>
+                        <th>Terça</th>
+                        <th>Quarta</th>
+                        <th>Quinta</th>
+                        <th>Sexta</th>
+                        <th>Sábado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>08:00-09:00</strong></td>
+                        <td class="bg-warning">Yoga Matinal<br><small>Sala A (8/15)</small></td>
+                        <td></td>
+                        <td class="bg-warning">Yoga Matinal<br><small>Sala A (12/15)</small></td>
+                        <td></td>
+                        <td class="bg-warning">Yoga Matinal<br><small>Sala A (10/15)</small></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td><strong>10:00-11:00</strong></td>
+                        <td></td>
+                        <td class="bg-primary">Pilates<br><small>Sala A (5/10)</small></td>
+                        <td></td>
+                        <td class="bg-primary">Pilates<br><small>Sala A (8/10)</small></td>
+                        <td></td>
+                        <td class="bg-primary">Pilates<br><small>Sala A (6/10)</small></td>
+                    </tr>
+                    <tr>
+                        <td><strong>17:00-18:00</strong></td>
+                        <td></td>
+                        <td class="bg-info">Zumba<br><small>Sala B (15/25)</small></td>
+                        <td></td>
+                        <td class="bg-info">Zumba<br><small>Sala B (20/25)</small></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Avaliações Recentes -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5>Avaliações Recentes dos Alunos</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="border rounded p-3 mb-3">
+                    <div class="d-flex justify-content-between">
+                        <strong>Maria Santos</strong>
+                        <span class="text-warning">⭐⭐⭐⭐⭐</span>
+                    </div>
+                    <small class="text-muted">Aula de Yoga - 28/10/2024</small>
+                    <p class="mt-2">"Excelente aula! A Ana tem uma energia incrível e consegue transmitir muita calma e foco."</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="border rounded p-3 mb-3">
+                    <div class="d-flex justify-content-between">
+                        <strong>João Silva</strong>
+                        <span class="text-warning">⭐⭐⭐⭐⭐</span>
+                    </div>
+                    <small class="text-muted">Aula de Pilates - 26/10/2024</small>
+                    <p class="mt-2">"Primeira vez no Pilates e adorei! A Ana explica muito bem os exercícios."</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="border rounded p-3 mb-3">
+                    <div class="d-flex justify-content-between">
+                        <strong>Rita Costa</strong>
+                        <span class="text-warning">⭐⭐⭐⭐⭐</span>
+                    </div>
+                    <small class="text-muted">Aula de Zumba - 25/10/2024</small>
+                    <p class="mt-2">"Que energia! Sempre saio das aulas da Ana com um sorriso no rosto."</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="border rounded p-3 mb-3">
+                    <div class="d-flex justify-content-between">
+                        <strong>Carlos Mendes</strong>
+                        <span class="text-warning">⭐⭐⭐⭐⭐</span>
+                    </div>
+                    <small class="text-muted">Aula de Yoga - 24/10/2024</small>
+                    <p class="mt-2">"Técnica perfeita e muito paciente com iniciantes. Recomendo!"</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Certificações e Formações -->
+<div class="card">
+    <div class="card-header">
+        <h5>Certificações e Formações</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Certificação</th>
+                        <th>Entidade</th>
+                        <th>Data de Obtenção</th>
+                        <th>Validade</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Yoga Teacher Training 200h</td>
+                        <td>Yoga Alliance</td>
+                        <td>15/06/2022</td>
+                        <td>Vitalícia</td>
+                        <td><span class="badge bg-success">Válida</span></td>
+                    </tr>
+                    <tr>
+                        <td>Pilates Mat Certification</td>
+                        <td>BASI Pilates</td>
+                        <td>20/03/2023</td>
+                        <td>20/03/2025</td>
+                        <td><span class="badge bg-success">Válida</span></td>
+                    </tr>
+                    <tr>
+                        <td>Zumba Basic 1</td>
+                        <td>Zumba Fitness</td>
+                        <td>10/09/2022</td>
+                        <td>10/09/2024</td>
+                        <td><span class="badge bg-warning">A renovar</span></td>
+                    </tr>
+                    <tr>
+                        <td>Primeiros Socorros</td>
+                        <td>Cruz Vermelha</td>
+                        <td>05/01/2023</td>
+                        <td>05/01/2025</td>
+                        <td><span class="badge bg-success">Válida</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
