@@ -11,22 +11,34 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
-from decouple import config, Csv
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Carregar variáveis de ambiente do .env
+from dotenv import load_dotenv
+load_dotenv(BASE_DIR.parent / '.env')
+
+def get_env(key, default=None, cast=None):
+    """Helper para ler variáveis de ambiente"""
+    value = os.getenv(key, default)
+    if cast and value is not None:
+        if cast == bool:
+            return value.lower() in ('true', '1', 'yes', 'on')
+        return cast(value)
+    return value
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config('SECRET_KEY')
+SECRET_KEY = get_env('SECRET_KEY', 'django-insecure-fallback-key')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config('DEBUG', default=False, cast=bool)
+DEBUG = get_env('DEBUG', True, cast=bool)
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='', cast=Csv())
+ALLOWED_HOSTS = get_env('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 
 # Application definition
@@ -38,11 +50,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'PrimeFit',
 ]
-
-# Custom User Model
-AUTH_USER_MODEL = 'PrimeFit.CustomUser'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -59,7 +67,7 @@ ROOT_URLCONF = 'PrimeFit.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'PrimeFit' / 'Templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -77,46 +85,17 @@ WSGI_APPLICATION = 'PrimeFit.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# Configuração temporária com SQLite (remova quando PostgreSQL estiver funcionando)
+# Configuração PostgreSQL
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': get_env('POSTGRES_DB', 'primefit_db'),
+        'USER': get_env('POSTGRES_USER', 'postgres'),
+        'PASSWORD': get_env('POSTGRES_PASSWORD', ''),
+        'HOST': get_env('POSTGRES_HOST', 'localhost'),
+        'PORT': get_env('POSTGRES_PORT', '5432'),
     }
 }
-
-# Configuração PostgreSQL (descomentada quando resolver os problemas de conexão)
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         "NAME": config('POSTGRES_DB'),
-#         "USER": config('POSTGRES_USER'),
-#         "PASSWORD": config('POSTGRES_PASSWORD'),
-#         "HOST": config('POSTGRES_HOST'),
-#         "PORT": config('POSTGRES_PORT'),
-#     }
-# }
-
-# MongoDB Configuration
-import pymongo
-from pymongo import MongoClient
-
-# MongoDB connection usando variáveis do .env
-MONGODB_SETTINGS = {
-    'db': config('MONGODB_DB', default='ProjetoBD2'),
-    'url': config('MONGODB_URL', default='mongodb://localhost:27017/'),
-}
-
-# MongoDB client instance
-try:
-    mongo_client = MongoClient(MONGODB_SETTINGS['url'])
-    mongodb = mongo_client[MONGODB_SETTINGS['db']]
-    # Testa a conexão
-    mongo_client.admin.command('ping')
-    print(f"MongoDB connected successfully to {MONGODB_SETTINGS['db']}")
-except Exception as e:
-    print(f"MongoDB connection error: {e}")
-    mongodb = None
 
 
 # Password validation
@@ -138,9 +117,15 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # Authentication settings
-LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = 'member_home'
-LOGOUT_REDIRECT_URL = 'login'
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/member/home/'
+LOGOUT_REDIRECT_URL = '/login/'
+
+# Desabilitar migrações automáticas para tabelas que já existem
+MIGRATION_MODULES = {
+    'auth': None,
+    'contenttypes': None,
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
@@ -157,7 +142,11 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [
+    BASE_DIR / 'PrimeFit' / 'static',
+]
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

@@ -1,0 +1,63 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Dashboard Instrutor{% endblock %}
+
+{% block extra_css %}
+<style>
+    body { --theme-color: var(--success-color); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-instrutor">
+    <div class="dashboard-header primefit-fade-in">
+        <h1 class="mb-0">Dashboard do Instrutor</h1>
+        <p class="mb-0">Bem-vindo, {{ user_email }}!</p>
+    </div>
+    
+    <div class="dashboard-stats primefit-fade-in">
+        <div class="stat-card">
+            <span class="stat-number">12</span>
+            <div class="stat-label">Aulas Esta Semana</div>
+        </div>
+        <div class="stat-card">
+            <span class="stat-number">45</span>
+            <div class="stat-label">Alunos Inscritos</div>
+        </div>
+        <div class="stat-card">
+            <span class="stat-number">8.5</span>
+            <div class="stat-label">Avaliação Média</div>
+        </div>
+    </div>
+    <div class="primefit-row">
+        <div class="primefit-col-4">
+            <div class="primefit-card primefit-fade-in">
+                <div class="primefit-card-header">
+                    <h5 class="primefit-card-title">Aulas</h5>
+                </div>
+                <p class="text-secondary">Gerir as suas aulas</p>
+                <a href="#" class="primefit-btn primefit-btn-success">Ver Aulas</a>
+            </div>
+        </div>
+        <div class="primefit-col-4">
+            <div class="primefit-card primefit-fade-in">
+                <div class="primefit-card-header">
+                    <h5 class="primefit-card-title">Membros</h5>
+                </div>
+                <p class="text-secondary">Ver membros das suas aulas</p>
+                <a href="#" class="primefit-btn primefit-btn-success">Ver Membros</a>
+            </div>
+        </div>
+        <div class="primefit-col-4">
+            <div class="primefit-card primefit-fade-in">
+                <div class="primefit-card-header">
+                    <h5 class="primefit-card-title">Horário</h5>
+                </div>
+                <p class="text-secondary">Visualizar horário</p>
+                <a href="#" class="primefit-btn primefit-btn-success">Ver Horário</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

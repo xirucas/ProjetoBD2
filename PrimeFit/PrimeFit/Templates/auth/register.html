@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registar - PrimeFit</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/primefit.css' %}">
+</head>
+<body>
+    <div class="primefit-container mt-5">
+        <div class="primefit-row justify-content-center">
+            <div class="primefit-col-6">
+                <div class="primefit-card primefit-fade-in">
+                    <div class="primefit-card-header">
+                        <h3 class="primefit-card-title text-center">Registar na PrimeFit</h3>
+                    </div>
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="primefit-alert primefit-alert-{% if message.tags == 'error' %}error{% else %}{{ message.tags }}{% endif %}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="primefit-form-group">
+                            <label for="email" class="primefit-form-label">Email:</label>
+                            <input type="email" class="primefit-form-input" id="email" name="email" required>
+                        </div>
+                        <div class="primefit-form-group">
+                            <label for="password" class="primefit-form-label">Password:</label>
+                            <input type="password" class="primefit-form-input" id="password" name="password" required>
+                        </div>
+                        <div class="primefit-form-group">
+                            <label for="confirm_password" class="primefit-form-label">Confirmar Password:</label>
+                            <input type="password" class="primefit-form-input" id="confirm_password" name="confirm_password" required>
+                        </div>
+                        <div class="primefit-form-group">
+                            <label for="user_type" class="primefit-form-label">Tipo de Utilizador:</label>
+                            <select class="primefit-form-select" id="user_type" name="user_type" required>
+                                <option value="">Selecione...</option>
+                                <option value="1">Gestor</option>
+                                <option value="2">Instrutor</option>
+                                <option value="3">Membro</option>
+                            </select>
+                        </div>
+                        <div class="primefit-form-group">
+                            <button type="submit" class="primefit-btn primefit-btn-success w-100">Registar</button>
+                        </div>
+                    </form>
+                    <div class="text-center mt-3">
+                        <a href="{% url 'login' %}" class="text-primary">Já tem conta? Faça login</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
