@@ -1,0 +1,162 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1>Dashboard - Visão Geral</h1>
+    </div>
+</div>
+
+<!-- Cards de Estatísticas -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4>324</h4>
+                        <p>Total Membros</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-users fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4>47</h4>
+                        <p>Check-ins Hoje</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-door-open fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4>12</h4>
+                        <p>Aulas Hoje</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-dumbbell fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4>€18,750</h4>
+                        <p>Receita Mensal</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-euro-sign fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabelas de Dados -->
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5>Check-ins Recentes</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Membro</th>
+                            <th>Entrada</th>
+                            <th>Saída</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1001</td>
+                            <td>Maria Silva (ID: 205)</td>
+                            <td>09:15</td>
+                            <td>10:45</td>
+                            <td><span class="badge bg-success">Finalizado</span></td>
+                        </tr>
+                        <tr>
+                            <td>1002</td>
+                            <td>João Santos (ID: 187)</td>
+                            <td>08:30</td>
+                            <td>-</td>
+                            <td><span class="badge bg-warning">Ativo</span></td>
+                        </tr>
+                        <tr>
+                            <td>1003</td>
+                            <td>Ana Costa (ID: 156)</td>
+                            <td>07:45</td>
+                            <td>09:15</td>
+                            <td><span class="badge bg-success">Finalizado</span></td>
+                        </tr>
+                        <tr>
+                            <td>1004</td>
+                            <td>Pedro Lima (ID: 298)</td>
+                            <td>19:20</td>
+                            <td>-</td>
+                            <td><span class="badge bg-warning">Ativo</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>Próximas Aulas</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3 border-bottom pb-2">
+                    <strong>Yoga Matinal</strong><br>
+                    <small class="text-muted">10:00-11:00 | Sala A</small><br>
+                    <small>Instrutor: Ana Ferreira (ID: 15)</small><br>
+                    <small class="text-success">8/15 inscritos</small>
+                </div>
+                <div class="mb-3 border-bottom pb-2">
+                    <strong>CrossFit Intenso</strong><br>
+                    <small class="text-muted">11:30-12:30 | Sala B</small><br>
+                    <small>Instrutor: Carlos Mendes (ID: 22)</small><br>
+                    <small class="text-warning">12/12 inscritos (Lotado)</small>
+                </div>
+                <div class="mb-3 border-bottom pb-2">
+                    <strong>Pilates</strong><br>
+                    <small class="text-muted">14:00-15:00 | Sala A</small><br>
+                    <small>Instrutor: Sofia Reis (ID: 18)</small><br>
+                    <small class="text-success">5/10 inscritos</small>
+                </div>
+                <div class="mb-3">
+                    <strong>Spinning</strong><br>
+                    <small class="text-muted">18:00-19:00 | Sala C</small><br>
+                    <small>Instrutor: Miguel Torres (ID: 31)</small><br>
+                    <small class="text-success">6/20 inscritos</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

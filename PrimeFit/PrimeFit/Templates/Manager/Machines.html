@@ -1,0 +1,286 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Equipamentos{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Gerenciamento de Equipamentos</h1>
+    <div class="d-flex gap-2">
+        <button class="btn btn-primary">+ Novo Equipamento</button>
+        <button class="btn btn-warning">Manutenção</button>
+    </div>
+</div>
+
+<!-- Estatísticas de Equipamentos -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <h5>Total de Equipamentos</h5>
+                <h2>42</h2>
+                <small>Máquinas cadastradas</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <h5>Em Funcionamento</h5>
+                <h2>38</h2>
+                <small>90.5% disponível</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <h5>Em Manutenção</h5>
+                <h2>3</h2>
+                <small>Indisponíveis</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-danger text-white">
+            <div class="card-body">
+                <h5>Fora de Serviço</h5>
+                <h2>1</h2>
+                <small>Aguardando reparo</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filtros -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <select class="form-select">
+            <option>Todas as Categorias</option>
+            <option>Cardio</option>
+            <option>Musculação</option>
+            <option>Funcional</option>
+            <option>Pesos Livres</option>
+        </select>
+    </div>
+    <div class="col-md-3">
+        <select class="form-select">
+            <option>Todos os Status</option>
+            <option>Funcionando</option>
+            <option>Manutenção</option>
+            <option>Fora de Serviço</option>
+        </select>
+    </div>
+    <div class="col-md-6">
+        <input type="text" class="form-control" placeholder="Buscar por nome ou código da máquina...">
+    </div>
+</div>
+
+<!-- Mapa do Ginásio -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5>Mapa do Ginásio - Status dos Equipamentos</h5>
+    </div>
+    <div class="card-body">
+        <div class="row text-center">
+            <div class="col-md-12">
+                <h6>Área Cardio</h6>
+                <div class="d-flex justify-content-center flex-wrap gap-2 mb-3">
+                    <div class="badge bg-success p-2">Esteira 1</div>
+                    <div class="badge bg-success p-2">Esteira 2</div>
+                    <div class="badge bg-warning p-2">Esteira 3</div>
+                    <div class="badge bg-success p-2">Bike 1</div>
+                    <div class="badge bg-success p-2">Bike 2</div>
+                    <div class="badge bg-success p-2">Elíptico 1</div>
+                    <div class="badge bg-danger p-2">Elíptico 2</div>
+                </div>
+                <h6>Área Musculação</h6>
+                <div class="d-flex justify-content-center flex-wrap gap-2 mb-3">
+                    <div class="badge bg-success p-2">Supino</div>
+                    <div class="badge bg-success p-2">Leg Press</div>
+                    <div class="badge bg-warning p-2">Puxador</div>
+                    <div class="badge bg-success p-2">Smith</div>
+                    <div class="badge bg-success p-2">Cadeira Ext.</div>
+                    <div class="badge bg-success p-2">Mesa Flexora</div>
+                </div>
+                <h6>Área Funcional</h6>
+                <div class="d-flex justify-content-center flex-wrap gap-2">
+                    <div class="badge bg-success p-2">TRX 1</div>
+                    <div class="badge bg-success p-2">TRX 2</div>
+                    <div class="badge bg-warning p-2">Kettlebells</div>
+                    <div class="badge bg-success p-2">Medicine Ball</div>
+                </div>
+            </div>
+        </div>
+        <hr>
+        <div class="text-center">
+            <span class="badge bg-success me-2">Funcionando</span>
+            <span class="badge bg-warning me-2">Manutenção</span>
+            <span class="badge bg-danger">Fora de Serviço</span>
+        </div>
+    </div>
+</div>
+
+<!-- Lista Detalhada de Equipamentos -->
+<div class="card">
+    <div class="card-header">
+        <h5>Inventário de Equipamentos</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Código</th>
+                        <th>Nome</th>
+                        <th>Categoria</th>
+                        <th>Marca</th>
+                        <th>Modelo</th>
+                        <th>Data Aquisição</th>
+                        <th>Última Manutenção</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>EST-001</td>
+                        <td>Esteira Profissional</td>
+                        <td>Cardio</td>
+                        <td>TechnoGym</td>
+                        <td>Run Race 1200</td>
+                        <td>15/03/2023</td>
+                        <td>20/10/2024</td>
+                        <td><span class="badge bg-success">Funcionando</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary">Ver</button>
+                            <button class="btn btn-sm btn-outline-warning">Manutenção</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>EST-002</td>
+                        <td>Esteira Ergométrica</td>
+                        <td>Cardio</td>
+                        <td>Life Fitness</td>
+                        <td>T3 Go</td>
+                        <td>10/05/2023</td>
+                        <td>15/10/2024</td>
+                        <td><span class="badge bg-success">Funcionando</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary">Ver</button>
+                            <button class="btn btn-sm btn-outline-warning">Manutenção</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>EST-003</td>
+                        <td>Esteira Residencial</td>
+                        <td>Cardio</td>
+                        <td>Matrix</td>
+                        <td>T7x</td>
+                        <td>22/07/2022</td>
+                        <td>-</td>
+                        <td><span class="badge bg-warning">Manutenção</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary">Ver</button>
+                            <button class="btn btn-sm btn-outline-success">Liberar</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td>BIK-001</td>
+                        <td>Bike Ergométrica</td>
+                        <td>Cardio</td>
+                        <td>Schwinn</td>
+                        <td>IC4</td>
+                        <td>30/11/2023</td>
+                        <td>25/10/2024</td>
+                        <td><span class="badge bg-success">Funcionando</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary">Ver</button>
+                            <button class="btn btn-sm btn-outline-warning">Manutenção</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td>ELI-002</td>
+                        <td>Elíptico Digital</td>
+                        <td>Cardio</td>
+                        <td>Precor</td>
+                        <td>EFX 225</td>
+                        <td>18/01/2022</td>
+                        <td>05/08/2024</td>
+                        <td><span class="badge bg-danger">Fora de Serviço</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary">Ver</button>
+                            <button class="btn btn-sm btn-outline-danger">Reparar</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>6</td>
+                        <td>SUP-001</td>
+                        <td>Supino Reto</td>
+                        <td>Musculação</td>
+                        <td>Hammer Strength</td>
+                        <td>HS-4007</td>
+                        <td>12/09/2023</td>
+                        <td>18/10/2024</td>
+                        <td><span class="badge bg-success">Funcionando</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary">Ver</button>
+                            <button class="btn btn-sm btn-outline-warning">Manutenção</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>7</td>
+                        <td>LEG-001</td>
+                        <td>Leg Press 45°</td>
+                        <td>Musculação</td>
+                        <td>Cybex</td>
+                        <td>Eagle NX</td>
+                        <td>05/04/2023</td>
+                        <td>22/10/2024</td>
+                        <td><span class="badge bg-success">Funcionando</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary">Ver</button>
+                            <button class="btn btn-sm btn-outline-warning">Manutenção</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>8</td>
+                        <td>PUX-001</td>
+                        <td>Puxador Alto</td>
+                        <td>Musculação</td>
+                        <td>Technogym</td>
+                        <td>Selection Pro</td>
+                        <td>28/06/2022</td>
+                        <td>-</td>
+                        <td><span class="badge bg-warning">Manutenção</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary">Ver</button>
+                            <button class="btn btn-sm btn-outline-success">Liberar</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Paginação -->
+        <nav aria-label="Navegação das páginas">
+            <ul class="pagination justify-content-center">
+                <li class="page-item disabled">
+                    <a class="page-link" href="#" tabindex="-1">Anterior</a>
+                </li>
+                <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                <li class="page-item"><a class="page-link" href="#">2</a></li>
+                <li class="page-item"><a class="page-link" href="#">3</a></li>
+                <li class="page-item">
+                    <a class="page-link" href="#">Próximo</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,211 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Aulas{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Gerenciamento de Aulas</h1>
+    <button class="btn btn-primary">+ Nova Aula</button>
+</div>
+
+<!-- Filtros -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <select class="form-select">
+            <option>Todos os Instrutores</option>
+            <option>Ana Ferreira</option>
+            <option>Carlos Mendes</option>
+            <option>Sofia Reis</option>
+            <option>Miguel Torres</option>
+        </select>
+    </div>
+    <div class="col-md-3">
+        <select class="form-select">
+            <option>Todas as Salas</option>
+            <option>Sala A</option>
+            <option>Sala B</option>
+            <option>Sala C</option>
+        </select>
+    </div>
+    <div class="col-md-3">
+        <input type="date" class="form-control" value="2024-10-30">
+    </div>
+</div>
+
+<!-- Horário de Aulas -->
+<div class="card">
+    <div class="card-header">
+        <h5>Horário de Aulas - Hoje (30/10/2024)</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Hora</th>
+                        <th>Sala A</th>
+                        <th>Sala B</th>
+                        <th>Sala C</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>08:00</strong></td>
+                        <td>
+                            <div class="border rounded p-2 bg-warning">
+                                <strong>Yoga Matinal</strong><br>
+                                <small>Instrutor: Ana Ferreira (ID: 15)</small><br>
+                                <small>Inscritos: 8/15</small>
+                            </div>
+                        </td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td><strong>09:00</strong></td>
+                        <td></td>
+                        <td>
+                            <div class="border rounded p-2 bg-success">
+                                <strong>CrossFit Intenso</strong><br>
+                                <small>Instrutor: Carlos Mendes (ID: 22)</small><br>
+                                <small>Inscritos: 12/12 (Lotado)</small>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="border rounded p-2 bg-info">
+                                <strong>Spinning</strong><br>
+                                <small>Instrutor: Miguel Torres (ID: 31)</small><br>
+                                <small>Inscritos: 6/20</small>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>10:00</strong></td>
+                        <td>
+                            <div class="border rounded p-2 bg-primary">
+                                <strong>Pilates</strong><br>
+                                <small>Instrutor: Sofia Reis (ID: 18)</small><br>
+                                <small>Inscritos: 5/10</small>
+                            </div>
+                        </td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td><strong>17:00</strong></td>
+                        <td></td>
+                        <td>
+                            <div class="border rounded p-2 bg-warning">
+                                <strong>Zumba</strong><br>
+                                <small>Instrutor: Ana Ferreira (ID: 15)</small><br>
+                                <small>Inscritos: 15/25</small>
+                            </div>
+                        </td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td><strong>18:00</strong></td>
+                        <td>
+                            <div class="border rounded p-2 bg-success">
+                                <strong>Musculação</strong><br>
+                                <small>Instrutor: Carlos Mendes (ID: 22)</small><br>
+                                <small>Inscritos: 8/10</small>
+                            </div>
+                        </td>
+                        <td></td>
+                        <td>
+                            <div class="border rounded p-2 bg-info">
+                                <strong>Aqua Fitness</strong><br>
+                                <small>Instrutor: Sofia Reis (ID: 18)</small><br>
+                                <small>Inscritos: 12/15</small>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Lista Detalhada de Aulas -->
+<div class="card mt-4">
+    <div class="card-header">
+        <h5>Detalhes das Aulas Agendadas</h5>
+    </div>
+    <div class="card-body">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nome da Aula</th>
+                    <th>Instrutor</th>
+                    <th>Sala</th>
+                    <th>Horário</th>
+                    <th>Capacidade</th>
+                    <th>Inscritos</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>101</td>
+                    <td>Yoga Matinal</td>
+                    <td>Ana Ferreira</td>
+                    <td>Sala A</td>
+                    <td>08:00 - 09:00</td>
+                    <td>15</td>
+                    <td>8</td>
+                    <td><span class="badge bg-success">Ativa</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary">Ver</button>
+                        <button class="btn btn-sm btn-outline-warning">Editar</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>102</td>
+                    <td>CrossFit Intenso</td>
+                    <td>Carlos Mendes</td>
+                    <td>Sala B</td>
+                    <td>09:00 - 10:00</td>
+                    <td>12</td>
+                    <td>12</td>
+                    <td><span class="badge bg-warning">Lotada</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary">Ver</button>
+                        <button class="btn btn-sm btn-outline-warning">Editar</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>103</td>
+                    <td>Spinning</td>
+                    <td>Miguel Torres</td>
+                    <td>Sala C</td>
+                    <td>09:00 - 10:00</td>
+                    <td>20</td>
+                    <td>6</td>
+                    <td><span class="badge bg-success">Ativa</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary">Ver</button>
+                        <button class="btn btn-sm btn-outline-warning">Editar</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>104</td>
+                    <td>Pilates</td>
+                    <td>Sofia Reis</td>
+                    <td>Sala A</td>
+                    <td>10:00 - 11:00</td>
+                    <td>10</td>
+                    <td>5</td>
+                    <td><span class="badge bg-success">Ativa</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary">Ver</button>
+                        <button class="btn btn-sm btn-outline-warning">Editar</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

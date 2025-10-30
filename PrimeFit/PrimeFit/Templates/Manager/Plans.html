@@ -1,0 +1,280 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Planos{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Gerenciamento de Planos</h1>
+    <button class="btn btn-primary">+ Novo Plano</button>
+</div>
+
+<!-- Estatísticas dos Planos -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <h5>Plano Básico</h5>
+                <h2>145</h2>
+                <small>45% dos membros</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <h5>Plano Premium</h5>
+                <h2>128</h2>
+                <small>39% dos membros</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-danger text-white">
+            <div class="card-body">
+                <h5>Plano VIP</h5>
+                <h2>51</h2>
+                <small>16% dos membros</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <h5>Total de Membros</h5>
+                <h2>324</h2>
+                <small>Ativos</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Planos Disponíveis -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-header bg-primary text-white text-center">
+                <h4>Plano Básico</h4>
+                <h2>€25<small>/mês</small></h2>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-check text-success"></i> Acesso ao ginásio</li>
+                    <li><i class="fas fa-check text-success"></i> Área de musculação</li>
+                    <li><i class="fas fa-check text-success"></i> Vestiários</li>
+                    <li><i class="fas fa-times text-danger"></i> Aulas de grupo</li>
+                    <li><i class="fas fa-times text-danger"></i> Personal trainer</li>
+                    <li><i class="fas fa-times text-danger"></i> Área VIP</li>
+                </ul>
+            </div>
+            <div class="card-footer text-center">
+                <span class="badge bg-success">145 Membros</span>
+                <div class="mt-2">
+                    <button class="btn btn-outline-primary btn-sm">Editar</button>
+                    <button class="btn btn-outline-secondary btn-sm">Ver Detalhes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-header bg-warning text-white text-center">
+                <h4>Plano Premium</h4>
+                <h2>€45<small>/mês</small></h2>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-check text-success"></i> Acesso ao ginásio</li>
+                    <li><i class="fas fa-check text-success"></i> Área de musculação</li>
+                    <li><i class="fas fa-check text-success"></i> Vestiários</li>
+                    <li><i class="fas fa-check text-success"></i> Aulas de grupo</li>
+                    <li><i class="fas fa-check text-success"></i> 2 sessões personal/mês</li>
+                    <li><i class="fas fa-times text-danger"></i> Área VIP</li>
+                </ul>
+            </div>
+            <div class="card-footer text-center">
+                <span class="badge bg-success">128 Membros</span>
+                <div class="mt-2">
+                    <button class="btn btn-outline-warning btn-sm">Editar</button>
+                    <button class="btn btn-outline-secondary btn-sm">Ver Detalhes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-header bg-danger text-white text-center">
+                <h4>Plano VIP</h4>
+                <h2>€65<small>/mês</small></h2>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-check text-success"></i> Acesso ao ginásio</li>
+                    <li><i class="fas fa-check text-success"></i> Área de musculação</li>
+                    <li><i class="fas fa-check text-success"></i> Vestiários premium</li>
+                    <li><i class="fas fa-check text-success"></i> Aulas de grupo</li>
+                    <li><i class="fas fa-check text-success"></i> Personal trainer ilimitado</li>
+                    <li><i class="fas fa-check text-success"></i> Área VIP</li>
+                </ul>
+            </div>
+            <div class="card-footer text-center">
+                <span class="badge bg-success">51 Membros</span>
+                <div class="mt-2">
+                    <button class="btn btn-outline-danger btn-sm">Editar</button>
+                    <button class="btn btn-outline-secondary btn-sm">Ver Detalhes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Análise de Performance dos Planos -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5>Performance dos Planos - Outubro 2024</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Plano</th>
+                        <th>Preço</th>
+                        <th>Membros Ativos</th>
+                        <th>Novos este Mês</th>
+                        <th>Cancelamentos</th>
+                        <th>Receita Mensal</th>
+                        <th>Taxa de Conversão</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="badge bg-primary">Básico</span></td>
+                        <td>€25.00</td>
+                        <td>145</td>
+                        <td>+12</td>
+                        <td>-3</td>
+                        <td>€3.625</td>
+                        <td>78%</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary">Editar</button>
+                            <button class="btn btn-sm btn-outline-info">Relatório</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge bg-warning">Premium</span></td>
+                        <td>€45.00</td>
+                        <td>128</td>
+                        <td>+18</td>
+                        <td>-2</td>
+                        <td>€5.760</td>
+                        <td>85%</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-warning">Editar</button>
+                            <button class="btn btn-sm btn-outline-info">Relatório</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge bg-danger">VIP</span></td>
+                        <td>€65.00</td>
+                        <td>51</td>
+                        <td>+8</td>
+                        <td>-1</td>
+                        <td>€3.315</td>
+                        <td>92%</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-danger">Editar</button>
+                            <button class="btn btn-sm btn-outline-info">Relatório</button>
+                        </td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr class="table-dark">
+                        <th>Total</th>
+                        <th>-</th>
+                        <th>324</th>
+                        <th>+38</th>
+                        <th>-6</th>
+                        <th>€12.700</th>
+                        <th>82%</th>
+                        <th>-</th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Histórico de Mudanças de Planos -->
+<div class="card">
+    <div class="card-header">
+        <h5>Mudanças de Planos Recentes</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Membro</th>
+                        <th>ID Membro</th>
+                        <th>Plano Anterior</th>
+                        <th>Novo Plano</th>
+                        <th>Motivo</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>30/10/2024</td>
+                        <td>Ana Costa</td>
+                        <td>1001</td>
+                        <td><span class="badge bg-primary">Básico</span></td>
+                        <td><span class="badge bg-warning">Premium</span></td>
+                        <td>Upgrade</td>
+                        <td><span class="badge bg-success">Ativo</span></td>
+                    </tr>
+                    <tr>
+                        <td>29/10/2024</td>
+                        <td>Carlos Silva</td>
+                        <td>1005</td>
+                        <td><span class="badge bg-warning">Premium</span></td>
+                        <td><span class="badge bg-danger">VIP</span></td>
+                        <td>Upgrade</td>
+                        <td><span class="badge bg-success">Ativo</span></td>
+                    </tr>
+                    <tr>
+                        <td>28/10/2024</td>
+                        <td>Maria Santos</td>
+                        <td>1002</td>
+                        <td>-</td>
+                        <td><span class="badge bg-primary">Básico</span></td>
+                        <td>Novo Membro</td>
+                        <td><span class="badge bg-success">Ativo</span></td>
+                    </tr>
+                    <tr>
+                        <td>27/10/2024</td>
+                        <td>Pedro Oliveira</td>
+                        <td>1003</td>
+                        <td><span class="badge bg-danger">VIP</span></td>
+                        <td><span class="badge bg-warning">Premium</span></td>
+                        <td>Downgrade</td>
+                        <td><span class="badge bg-success">Ativo</span></td>
+                    </tr>
+                    <tr>
+                        <td>26/10/2024</td>
+                        <td>Sofia Reis</td>
+                        <td>1025</td>
+                        <td>-</td>
+                        <td><span class="badge bg-danger">VIP</span></td>
+                        <td>Novo Membro</td>
+                        <td><span class="badge bg-success">Ativo</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -38,7 +38,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'PrimeFit',
 ]
+
+# Custom User Model
+AUTH_USER_MODEL = 'PrimeFit.CustomUser'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -73,16 +77,46 @@ WSGI_APPLICATION = 'PrimeFit.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+# Configuração temporária com SQLite (remova quando PostgreSQL estiver funcionando)
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        "NAME": config('POSTGRES_DB'),
-        "USER": config('POSTGRES_USER'),
-        "PASSWORD": config('POSTGRES_PASSWORD'),
-        "HOST": config('POSTGRES_HOST'),
-        "PORT": config('POSTGRES_PORT'),
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+# Configuração PostgreSQL (descomentada quando resolver os problemas de conexão)
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         "NAME": config('POSTGRES_DB'),
+#         "USER": config('POSTGRES_USER'),
+#         "PASSWORD": config('POSTGRES_PASSWORD'),
+#         "HOST": config('POSTGRES_HOST'),
+#         "PORT": config('POSTGRES_PORT'),
+#     }
+# }
+
+# MongoDB Configuration
+import pymongo
+from pymongo import MongoClient
+
+# MongoDB connection usando variáveis do .env
+MONGODB_SETTINGS = {
+    'db': config('MONGODB_DB', default='ProjetoBD2'),
+    'url': config('MONGODB_URL', default='mongodb://localhost:27017/'),
+}
+
+# MongoDB client instance
+try:
+    mongo_client = MongoClient(MONGODB_SETTINGS['url'])
+    mongodb = mongo_client[MONGODB_SETTINGS['db']]
+    # Testa a conexão
+    mongo_client.admin.command('ping')
+    print(f"MongoDB connected successfully to {MONGODB_SETTINGS['db']}")
+except Exception as e:
+    print(f"MongoDB connection error: {e}")
+    mongodb = None
 
 
 # Password validation
@@ -103,6 +137,10 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# Authentication settings
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'member_home'
+LOGOUT_REDIRECT_URL = 'login'
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
