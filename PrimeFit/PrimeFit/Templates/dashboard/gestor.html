@@ -1,0 +1,67 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Dashboard Gestor{% endblock %}
+
+{% block extra_css %}
+<style>
+    body { --theme-color: var(--primary-color); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-gestor">
+    <div class="dashboard-header primefit-fade-in">
+        <h1 class="mb-0">Dashboard do Gestor</h1>
+        <p class="mb-0">Bem-vindo, {{ user_email }}!</p>
+    </div>
+    
+    <div class="dashboard-stats primefit-fade-in">
+        <div class="stat-card">
+            <span class="stat-number">125</span>
+            <div class="stat-label">Membros Ativos</div>
+        </div>
+        <div class="stat-card">
+            <span class="stat-number">8</span>
+            <div class="stat-label">Instrutores</div>
+        </div>
+        <div class="stat-card">
+            <span class="stat-number">42</span>
+            <div class="stat-label">Aulas Esta Semana</div>
+        </div>
+        <div class="stat-card">
+            <span class="stat-number">€3,250</span>
+            <div class="stat-label">Receita Mensal</div>
+        </div>
+    </div>
+    <div class="primefit-row">
+        <div class="primefit-col-4">
+            <div class="primefit-card primefit-fade-in">
+                <div class="primefit-card-header">
+                    <h5 class="primefit-card-title">Gestão de Utilizadores</h5>
+                </div>
+                <p class="text-secondary">Gerir membros e instrutores</p>
+                <a href="#" class="primefit-btn primefit-btn-primary">Ver Utilizadores</a>
+            </div>
+        </div>
+        <div class="primefit-col-4">
+            <div class="primefit-card primefit-fade-in">
+                <div class="primefit-card-header">
+                    <h5 class="primefit-card-title">Relatórios</h5>
+                </div>
+                <p class="text-secondary">Visualizar relatórios do ginásio</p>
+                <a href="#" class="primefit-btn primefit-btn-primary">Ver Relatórios</a>
+            </div>
+        </div>
+        <div class="primefit-col-4">
+            <div class="primefit-card primefit-fade-in">
+                <div class="primefit-card-header">
+                    <h5 class="primefit-card-title">Configurações</h5>
+                </div>
+                <p class="text-secondary">Configurar sistema</p>
+                <a href="#" class="primefit-btn primefit-btn-primary">Configurações</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

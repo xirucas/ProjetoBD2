@@ -1,0 +1,420 @@
+/* ==========================================
+   PrimeFit - Estilos Gerais do Site
+   ========================================== */
+
+/* Variáveis CSS para cores do tema */
+:root {
+    --primary-color: #007bff;
+    --secondary-color: #6c757d;
+    --success-color: #28a745;
+    --info-color: #17a2b8;
+    --warning-color: #ffc107;
+    --danger-color: #dc3545;
+    --light-color: #f8f9fa;
+    --dark-color: #343a40;
+    --white-color: #ffffff;
+    --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Reset e configurações globais */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--font-family);
+    line-height: 1.6;
+    color: var(--dark-color);
+    background-color: var(--light-color);
+}
+
+/* ==========================================
+   CLASSES UTILITÁRIAS GERAIS
+   ========================================== */
+
+/* Margens e Padding */
+.m-auto { margin: auto; }
+.mt-auto { margin-top: auto; }
+.mb-auto { margin-bottom: auto; }
+.ml-auto { margin-left: auto; }
+.mr-auto { margin-right: auto; }
+
+.p-0 { padding: 0; }
+.p-1 { padding: 0.25rem; }
+.p-2 { padding: 0.5rem; }
+.p-3 { padding: 1rem; }
+.p-4 { padding: 1.5rem; }
+.p-5 { padding: 3rem; }
+
+.m-0 { margin: 0; }
+.m-1 { margin: 0.25rem; }
+.m-2 { margin: 0.5rem; }
+.m-3 { margin: 1rem; }
+.m-4 { margin: 1.5rem; }
+.m-5 { margin: 3rem; }
+
+/* Texto */
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+.text-justify { text-align: justify; }
+
+.text-uppercase { text-transform: uppercase; }
+.text-lowercase { text-transform: lowercase; }
+.text-capitalize { text-transform: capitalize; }
+
+.text-primary { color: var(--primary-color) !important; }
+.text-secondary { color: var(--secondary-color) !important; }
+.text-success { color: var(--success-color) !important; }
+.text-info { color: var(--info-color) !important; }
+.text-warning { color: var(--warning-color) !important; }
+.text-danger { color: var(--danger-color) !important; }
+.text-light { color: var(--light-color) !important; }
+.text-dark { color: var(--dark-color) !important; }
+.text-white { color: var(--white-color) !important; }
+
+/* Backgrounds */
+.bg-primary { background-color: var(--primary-color) !important; }
+.bg-secondary { background-color: var(--secondary-color) !important; }
+.bg-success { background-color: var(--success-color) !important; }
+.bg-info { background-color: var(--info-color) !important; }
+.bg-warning { background-color: var(--warning-color) !important; }
+.bg-danger { background-color: var(--danger-color) !important; }
+.bg-light { background-color: var(--light-color) !important; }
+.bg-dark { background-color: var(--dark-color) !important; }
+.bg-white { background-color: var(--white-color) !important; }
+
+/* ==========================================
+   COMPONENTES ESPECÍFICOS DO PRIMEFIT
+   ========================================== */
+
+/* Container principal */
+.primefit-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 15px;
+}
+
+/* Cards personalizados */
+.primefit-card {
+    background: var(--white-color);
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.primefit-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+}
+
+.primefit-card-header {
+    border-bottom: 2px solid var(--light-color);
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+}
+
+.primefit-card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--dark-color);
+    margin-bottom: 0.5rem;
+}
+
+/* Botões personalizados */
+.primefit-btn {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 5px;
+    text-decoration: none;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    font-size: 1rem;
+}
+
+.primefit-btn-primary {
+    background-color: var(--primary-color);
+    color: var(--white-color);
+}
+
+.primefit-btn-primary:hover {
+    background-color: #0056b3;
+    transform: translateY(-1px);
+}
+
+.primefit-btn-success {
+    background-color: var(--success-color);
+    color: var(--white-color);
+}
+
+.primefit-btn-success:hover {
+    background-color: #1e7e34;
+    transform: translateY(-1px);
+}
+
+.primefit-btn-info {
+    background-color: var(--info-color);
+    color: var(--white-color);
+}
+
+.primefit-btn-info:hover {
+    background-color: #138496;
+    transform: translateY(-1px);
+}
+
+.primefit-btn-danger {
+    background-color: var(--danger-color);
+    color: var(--white-color);
+}
+
+.primefit-btn-danger:hover {
+    background-color: #c82333;
+    transform: translateY(-1px);
+}
+
+/* Formulários */
+.primefit-form-group {
+    margin-bottom: 1rem;
+}
+
+.primefit-form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--dark-color);
+}
+
+.primefit-form-input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid #e9ecef;
+    border-radius: 5px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.primefit-form-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.primefit-form-select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid #e9ecef;
+    border-radius: 5px;
+    font-size: 1rem;
+    background-color: var(--white-color);
+    cursor: pointer;
+}
+
+/* Alertas */
+.primefit-alert {
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 5px;
+    border-left: 4px solid;
+}
+
+.primefit-alert-success {
+    background-color: #d4edda;
+    color: #155724;
+    border-left-color: var(--success-color);
+}
+
+.primefit-alert-error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border-left-color: var(--danger-color);
+}
+
+.primefit-alert-info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border-left-color: var(--info-color);
+}
+
+.primefit-alert-warning {
+    background-color: #fff3cd;
+    color: #856404;
+    border-left-color: var(--warning-color);
+}
+
+/* Navegação */
+.primefit-navbar {
+    background-color: var(--white-color);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 1rem 0;
+}
+
+.primefit-navbar-brand {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.primefit-navbar-nav {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    align-items: center;
+}
+
+.primefit-navbar-item {
+    margin-left: 1rem;
+}
+
+.primefit-navbar-link {
+    color: var(--dark-color);
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.primefit-navbar-link:hover {
+    background-color: var(--light-color);
+}
+
+/* Grid system */
+.primefit-row {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 -15px;
+}
+
+.primefit-col {
+    flex: 1;
+    padding: 0 15px;
+}
+
+.primefit-col-1 { flex: 0 0 8.333333%; max-width: 8.333333%; }
+.primefit-col-2 { flex: 0 0 16.666667%; max-width: 16.666667%; }
+.primefit-col-3 { flex: 0 0 25%; max-width: 25%; }
+.primefit-col-4 { flex: 0 0 33.333333%; max-width: 33.333333%; }
+.primefit-col-6 { flex: 0 0 50%; max-width: 50%; }
+.primefit-col-8 { flex: 0 0 66.666667%; max-width: 66.666667%; }
+.primefit-col-9 { flex: 0 0 75%; max-width: 75%; }
+.primefit-col-12 { flex: 0 0 100%; max-width: 100%; }
+
+/* ==========================================
+   RESPONSIVIDADE
+   ========================================== */
+
+@media (max-width: 768px) {
+    .primefit-container {
+        padding: 0 10px;
+    }
+    
+    .primefit-card {
+        padding: 1rem;
+    }
+    
+    .primefit-navbar-nav {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .primefit-navbar-item {
+        margin-left: 0;
+        margin-bottom: 0.5rem;
+    }
+    
+    .primefit-row {
+        margin: 0 -10px;
+    }
+    
+    .primefit-col {
+        padding: 0 10px;
+    }
+    
+    [class*="primefit-col-"] {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+}
+
+/* ==========================================
+   ANIMAÇÕES E EFEITOS
+   ========================================== */
+
+.primefit-fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.primefit-pulse {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+/* ==========================================
+   CLASSES ESPECÍFICAS PARA DASHBOARDS
+   ========================================== */
+
+.dashboard-gestor {
+    --theme-color: var(--primary-color);
+}
+
+.dashboard-instrutor {
+    --theme-color: var(--success-color);
+}
+
+.dashboard-membro {
+    --theme-color: var(--info-color);
+}
+
+.dashboard-header {
+    background: linear-gradient(135deg, var(--theme-color), #6a11cb);
+    color: var(--white-color);
+    padding: 2rem;
+    border-radius: 10px;
+    margin-bottom: 2rem;
+}
+
+.dashboard-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: var(--white-color);
+    padding: 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--theme-color);
+    display: block;
+}
+
+.stat-label {
+    color: var(--secondary-color);
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+}
