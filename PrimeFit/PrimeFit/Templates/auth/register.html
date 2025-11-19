@@ -27,8 +27,24 @@
                     <form method="post">
                         {% csrf_token %}
                         <div class="primefit-form-group">
+                            <label for="name" class="primefit-form-label">Nome:</label>
+                            <input type="text" class="primefit-form-input" id="name" name="name" required>
+                        </div>
+                        <div class="primefit-form-group">
                             <label for="email" class="primefit-form-label">Email:</label>
                             <input type="email" class="primefit-form-input" id="email" name="email" required>
+                        </div>
+                        <div class="primefit-form-group">
+                            <label for="nif" class="primefit-form-label">NIF:</label>
+                            <input type="text" class="primefit-form-input" id="nif" name="nif" required>
+                        </div>
+                        <div class="primefit-form-group">
+                            <label for="phone" class="primefit-form-label">Telefone:</label>
+                            <input type="text" class="primefit-form-input" id="phone" name="phone" required>
+                        </div>
+                        <div class="primefit-form-group">
+                            <label for="iban" class="primefit-form-label">IBAN:</label>
+                            <input type="text" class="primefit-form-input" id="iban" name="iban" required>
                         </div>
                         <div class="primefit-form-group">
                             <label for="password" class="primefit-form-label">Password:</label>
@@ -37,15 +53,6 @@
                         <div class="primefit-form-group">
                             <label for="confirm_password" class="primefit-form-label">Confirmar Password:</label>
                             <input type="password" class="primefit-form-input" id="confirm_password" name="confirm_password" required>
-                        </div>
-                        <div class="primefit-form-group">
-                            <label for="user_type" class="primefit-form-label">Tipo de Utilizador:</label>
-                            <select class="primefit-form-select" id="user_type" name="user_type" required>
-                                <option value="">Selecione...</option>
-                                <option value="1">Gestor</option>
-                                <option value="2">Instrutor</option>
-                                <option value="3">Membro</option>
-                            </select>
                         </div>
                         <div class="primefit-form-group">
                             <button type="submit" class="primefit-btn primefit-btn-success w-100">Registar</button>
