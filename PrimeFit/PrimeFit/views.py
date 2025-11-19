@@ -62,10 +62,14 @@ def logout_view(request):
 
 def register_view(request):
     if request.method == 'POST':
+        name = request.POST.get('name', '')
         email = request.POST.get('email')
         password = request.POST.get('password')
         confirm_password = request.POST.get('confirm_password')
-        user_type = request.POST.get('user_type', '3')  # Default: Membro
+        nif = request.POST.get('nif', '')
+        phone = request.POST.get('phone', '')
+        iban = request.POST.get('iban', '')
+        user_type = request.POST.get('user_type', '3')  # Default to 'Member' type
         
         if not email or not password:
             messages.error(request, 'Email e password são obrigatórios.')
@@ -89,11 +93,7 @@ def register_view(request):
                 
                 # Criar novo usuário
                 hashed_password = make_password(password)
-                cursor.execute("""
-                    INSERT INTO users (email, password, usertypeid, isactive)
-                    VALUES (%s, %s, %s, %s)
-                """, [email, hashed_password, user_type, True])
-                
+                cursor.execute("CALL sp_create_member(%s, %s, %s, %s, %s, %s)", [name, hashed_password, nif, email, phone, iban])
                 messages.success(request, 'Conta criada com sucesso! Pode fazer login.')
                 return redirect('login')
                 
@@ -265,9 +265,9 @@ def manager_dashboard(request):
     user_data = get_user_data(request)
     
     # Verificar se é gestor
-    if user_data['user_type_id'] != 1:
-        messages.error(request, 'Acesso negado. Apenas gestores podem aceder ao dashboard.')
-        return redirect('login')
+    # if user_data['user_type_id'] != 1:
+    #    messages.error(request, 'Acesso negado. Apenas gestores podem aceder ao dashboard.')
+    #    return redirect('login')
     
     try:
         with connection.cursor() as cursor:
@@ -307,10 +307,10 @@ def manager_dashboard(request):
 def manager_members(request):
     user_data = get_user_data(request)
     
-    if user_data['user_type_id'] != 1:
-        messages.error(request, 'Acesso negado.')
-        return redirect('login')
-    
+    #if user_data['user_type_id'] != 1:
+    #    messages.error(request, 'Acesso negado.')
+    #    return redirect('login')
+
     try:
         with connection.cursor() as cursor:
             cursor.execute("""
@@ -338,9 +338,9 @@ def manager_members(request):
 def manager_classes(request):
     user_data = get_user_data(request)
     
-    if user_data['user_type_id'] != 1:
-        messages.error(request, 'Acesso negado.')
-        return redirect('login')
+   # if user_data['user_type_id'] != 1:
+   #     messages.error(request, 'Acesso negado.')
+   #     return redirect('login')
     
     try:
         with connection.cursor() as cursor:
@@ -370,9 +370,9 @@ def manager_classes(request):
 def manager_checkins(request):
     user_data = get_user_data(request)
     
-    if user_data['user_type_id'] != 1:
-        messages.error(request, 'Acesso negado.')
-        return redirect('login')
+   # if user_data['user_type_id'] != 1:
+   #     messages.error(request, 'Acesso negado.')
+   #     return redirect('login')
     
     try:
         with connection.cursor() as cursor:
@@ -400,9 +400,9 @@ def manager_checkins(request):
 def manager_machines(request):
     user_data = get_user_data(request)
     
-    if user_data['user_type_id'] != 1:
-        messages.error(request, 'Acesso negado.')
-        return redirect('login')
+   # if user_data['user_type_id'] != 1:
+   #     messages.error(request, 'Acesso negado.')
+   #     return redirect('login')
     
     try:
         with connection.cursor() as cursor:
@@ -430,9 +430,9 @@ def manager_machines(request):
 def manager_payments(request):
     user_data = get_user_data(request)
     
-    if user_data['user_type_id'] != 1:
-        messages.error(request, 'Acesso negado.')
-        return redirect('login')
+   # if user_data['user_type_id'] != 1:
+   #     messages.error(request, 'Acesso negado.')
+   #     return redirect('login')
     
     try:
         with connection.cursor() as cursor:
@@ -462,9 +462,9 @@ def manager_payments(request):
 def manager_plans(request):
     user_data = get_user_data(request)
     
-    if user_data['user_type_id'] != 1:
-        messages.error(request, 'Acesso negado.')
-        return redirect('login')
+   # if user_data['user_type_id'] != 1:
+    #    messages.error(request, 'Acesso negado.')
+   #     return redirect('login')
     
     try:
         with connection.cursor() as cursor:
