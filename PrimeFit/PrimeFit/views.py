@@ -2,6 +2,10 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.db import connection
 from django.contrib.auth.hashers import make_password, check_password
+import logging
+
+# Configure logging
+logger = logging.getLogger(__name__)
 
 # Autenticação usando tabela USERS do PostgreSQL
 def login_view(request):
@@ -13,36 +17,33 @@ def login_view(request):
             messages.error(request, 'Email e password são obrigatórios.')
             return render(request, 'auth/login.html')
         
-        # Verificar credenciais na tabela USERS
+        # Verificar credenciais usando a view vw_user_authentication
         try:
             with connection.cursor() as cursor:
                 cursor.execute("""
-                    SELECT u.userid, u.email, u.password, u.usertypeid, u.isactive, ut.label
-                    FROM users u
-                    JOIN usertype ut ON u.usertypeid = ut.usertypeid
-                    WHERE u.email = %s AND u.isactive = true
+                    SELECT userid, email, name, password, usertypeid, isactive, user_type_label
+                    FROM vw_user_authentication
+                    WHERE email = %s
                 """, [email])
                 
                 user_data = cursor.fetchone()
                 
-                if user_data and check_password(password, user_data[2]):
+                if user_data and check_password(password, user_data[3]):
                     # Criar sessão de usuário
                     request.session['user_id'] = user_data[0]
                     request.session['email'] = user_data[1]
-                    request.session['user_type_id'] = user_data[3]
-                    request.session['user_type'] = user_data[5]
+                    request.session['user_name'] = user_data[2]
+                    request.session['user_type_id'] = user_data[4]
+                    request.session['user_type'] = user_data[6]
                     request.session['is_authenticated'] = True
                     
-                    # Atualizar last_login
-                    cursor.execute("""
-                        UPDATE users SET last_login = CURRENT_TIMESTAMP 
-                        WHERE userid = %s
-                    """, [user_data[0]])
+                    # Atualizar last_login usando procedimento armazenado
+                    cursor.execute("CALL sp_update_last_login(%s)", [user_data[0]])
                     
                     # Redirecionar baseado no tipo de usuário
-                    if user_data[3] == 1:  # Gestor
+                    if user_data[4] == 1:  # Gestor
                         return redirect('manager_dashboard')
-                    elif user_data[3] == 2:  # Instrutor
+                    elif user_data[4] == 2:  # Instrutor
                         return redirect('instructor_account')
                     else:  # Membro
                         return redirect('member_home')
@@ -69,6 +70,11 @@ def register_view(request):
         nif = request.POST.get('nif', '')
         phone = request.POST.get('phone', '')
         iban = request.POST.get('iban', '')
+        birth_date = request.POST.get('birth_date', '')
+        gender = request.POST.get('gender', '')
+        address = request.POST.get('address', '')
+        city = request.POST.get('city', '')
+        postal_code = request.POST.get('postal_code', '')
         user_type = request.POST.get('user_type', '3')  # Default to 'Member' type
         
         if not email or not password:
@@ -82,18 +88,38 @@ def register_view(request):
         if len(password) < 8:
             messages.error(request, 'A password deve ter pelo menos 8 caracteres.')
             return render(request, 'auth/register.html')
-        
+
+        if not birth_date:
+            messages.error(request, 'Data de nascimento é obrigatória.')
+            return render(request, 'auth/register.html')
+
+        if not gender:
+            messages.error(request, 'Gênero é obrigatório.')
+            return render(request, 'auth/register.html')
+
+        if not address:
+            messages.error(request, 'Endereço é obrigatório.')
+            return render(request, 'auth/register.html')
+
+        if not city:
+            messages.error(request, 'Cidade é obrigatória.')
+            return render(request, 'auth/register.html')
+
+        if not postal_code:
+            messages.error(request, 'Código postal é obrigatório.')
+            return render(request, 'auth/register.html')
+
         try:
             with connection.cursor() as cursor:
-                # Verificar se email já existe
-                cursor.execute("SELECT userid FROM users WHERE email = %s", [email])
+                # Verificar se email já existe usando vista
+                cursor.execute("SELECT userid, email FROM vw_email_exists WHERE email = %s", [email])
                 if cursor.fetchone():
                     messages.error(request, 'Este email já está registado.')
                     return render(request, 'auth/register.html')
                 
                 # Criar novo usuário
                 hashed_password = make_password(password)
-                cursor.execute("CALL sp_create_member(%s, %s, %s, %s, %s, %s)", [name, hashed_password, nif, email, phone, iban])
+                cursor.execute("CALL sp_create_member(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", [name, hashed_password, nif, email, phone, iban, birth_date, gender, address, city, postal_code])
                 messages.success(request, 'Conta criada com sucesso! Pode fazer login.')
                 return redirect('login')
                 
@@ -117,6 +143,7 @@ def get_user_data(request):
         return {
             'userid': request.session.get('user_id'),
             'email': request.session.get('email'),
+            'user_name': request.session.get('user_name'),
             'user_type_id': request.session.get('user_type_id'),
             'user_type': request.session.get('user_type'),
             'is_authenticated': True
@@ -127,58 +154,75 @@ def get_user_data(request):
 @custom_login_required
 def member_home(request):
     user_data = get_user_data(request)
-    
+    recent_checkins = month_classes_frequented = total_hours = 0
+    next_payment = ""
+    payment_price = ""
+    schedule_classes = []
+    available_classes = []
     try:
         with connection.cursor() as cursor:
-            # Buscar dados do membro
+            # Buscar check-ins recentes usando vista
             cursor.execute("""
-                SELECT m.memberid, m.name, m.email, m.registrationdate, 
-                       ms.subscriptionid, ms.startdate, ms.enddate, ms.isactive as subscription_active,
-                       p.name as plan_name, p.monthlyprice
-                FROM member m
-                LEFT JOIN membersubscription ms ON m.memberid = ms.memberid AND ms.isactive = true
-                LEFT JOIN plan p ON ms.planid = p.planid
-                WHERE m.userid = %s AND m.isactive = true
+                SELECT checkin_count, class_bookings, total_hours, next_payment, payment_price
+                FROM vw_member_stats_month
+                WHERE userid = %s
             """, [user_data['userid']])
-            
-            member_info = cursor.fetchone()
-            
-            # Buscar check-ins recentes
+
+            stats = cursor.fetchone()
+            recent_checkins = stats[0]
+            month_classes_frequented = stats[1]
+            total_hours = round(stats[2])
+            next_payment = stats[3] if stats[3] else "Pagamento em dia"
+            payment_price = round(stats[4], 2) if stats[3] else "0.00€"
+
             cursor.execute("""
-                SELECT checkinid, date, entrancetime, exittime
-                FROM checkin 
-                WHERE memberid = (SELECT memberid FROM member WHERE userid = %s)
-                ORDER BY date DESC, entrancetime DESC
-                LIMIT 5
+                SELECT classscheduleid, class_name, date, starttime, endtime, room
+                FROM vw_member_schedule_classes
+                WHERE userid = %s
             """, [user_data['userid']])
-            
-            recent_checkins = cursor.fetchall()
-    
+
+            schedule_classes = cursor.fetchall()
+
+            cursor.execute("""
+                SELECT classscheduleid, class_name, date, starttime, endtime, room, available_spots
+                FROM vw_member_available_classes
+                WHERE userid = %s
+            """, [user_data['userid']])
+
+            available_classes = cursor.fetchall()
+
     except Exception as e:
-        member_info = None
-        recent_checkins = []
         messages.error(request, f'Erro ao carregar dados: {str(e)}')
     
     context = {
         'user_data': user_data,
-        'member_info': member_info,
-        'recent_checkins': recent_checkins
+        'member_resume': {
+            'recent_checkins': recent_checkins,
+            'month_classes_frequented': month_classes_frequented,
+            'total_hours': total_hours,
+            'next_payment': next_payment,
+            'payment_price': payment_price
+        },
+        'schedule_classes': schedule_classes,
+        'available_classes': available_classes
     }
     return render(request, 'Member/HomePage.html', context)
 
 @custom_login_required
 def member_account(request):
     user_data = get_user_data(request)
+
+    if user_data['user_type_id'] != 3:
+        messages.error(request, 'Acesso negado. Apenas membros podem aceder à conta de membro.')
+        return redirect('login')
     
     try:
         with connection.cursor() as cursor:
             cursor.execute("""
-                SELECT m.memberid, m.name, m.nif, m.email, m.phone, m.iban, m.registrationdate,
-                       ms.startdate, ms.enddate, p.name as plan_name, p.monthlyprice, p.access24h
-                FROM member m
-                LEFT JOIN membersubscription ms ON m.memberid = ms.memberid AND ms.isactive = true
-                LEFT JOIN plan p ON ms.planid = p.planid
-                WHERE m.userid = %s
+                SELECT memberid, name, nif, email, phone, iban, birthdate, gender, address, city, postalcode, registrationdate,
+                       startdate, enddate, plan_name, monthlyprice, access24h
+                FROM vw_member_account_details
+                WHERE userid = %s
             """, [user_data['userid']])
             
             member_details = cursor.fetchone()
@@ -197,23 +241,26 @@ def member_account(request):
 @custom_login_required
 def instructor_account(request):
     user_data = get_user_data(request)
-    
+
+    if user_data['user_type_id'] != 2:
+        messages.error(request, 'Acesso negado. Apenas instrutores podem aceder à conta de instrutor.')
+        return redirect('login')
+
     try:
         with connection.cursor() as cursor:
             cursor.execute("""
-                SELECT i.instructorid, i.name, i.nif, i.email, i.phone, i.isactive
-                FROM instructor i
-                WHERE i.userid = %s
+                SELECT instructorid, name, nif, email, phone, isactive
+                FROM vw_instructor_info
+                WHERE userid = %s
             """, [user_data['userid']])
             
             instructor_info = cursor.fetchone()
             
-            # Buscar aulas do instrutor
+            # Buscar aulas do instrutor usando vista
             cursor.execute("""
-                SELECT c.classid, c.name, c.room, c.capacity, c.duration_minutes
-                FROM class c
-                WHERE c.instructorid = (SELECT instructorid FROM instructor WHERE userid = %s)
-                AND c.isactive = true
+                SELECT classid, name, room, capacity, duration_minutes
+                FROM vw_instructor_classes
+                WHERE userid = %s
             """, [user_data['userid']])
             
             classes = cursor.fetchall()
@@ -236,15 +283,13 @@ def instructor_class_management(request):
     
     try:
         with connection.cursor() as cursor:
-            # Buscar horários das aulas do instrutor
+            # Buscar horários das aulas do instrutor usando vista
             cursor.execute("""
-                SELECT cs.classscheduleid, c.name, cs.date, cs.starttime, cs.endtime, 
-                       cs.maxparticipants, c.room
-                FROM classschedule cs
-                JOIN class c ON cs.classid = c.classid
-                WHERE c.instructorid = (SELECT instructorid FROM instructor WHERE userid = %s)
-                AND cs.isactive = true
-                ORDER BY cs.date, cs.starttime
+                SELECT classscheduleid, name, date, starttime, endtime, 
+                       maxparticipants, room
+                FROM vw_class_schedules
+                WHERE userid = %s
+                ORDER BY date, starttime
             """, [user_data['userid']])
             
             class_schedules = cursor.fetchall()
@@ -271,24 +316,10 @@ def manager_dashboard(request):
     
     try:
         with connection.cursor() as cursor:
-            # Total de membros
-            cursor.execute("SELECT COUNT(*) FROM member WHERE isactive = true")
-            total_members = cursor.fetchone()[0]
-            
-            # Total de instrutores
-            cursor.execute("SELECT COUNT(*) FROM instructor WHERE isactive = true")
-            total_instructors = cursor.fetchone()[0]
-            
-            # Subscrições ativas
-            cursor.execute("SELECT COUNT(*) FROM membersubscription WHERE isactive = true")
-            active_memberships = cursor.fetchone()[0]
-            
-            # Check-ins de hoje
-            cursor.execute("""
-                SELECT COUNT(*) FROM checkin 
-                WHERE date = CURRENT_DATE
-            """)
-            today_checkins_count = cursor.fetchone()[0]
+            # Buscar estatísticas usando vista
+            cursor.execute("SELECT total_members, total_instructors, active_memberships, today_checkins FROM vw_dashboard_stats")
+            stats = cursor.fetchone()
+            total_members, total_instructors, active_memberships, today_checkins_count = stats
     
     except Exception as e:
         total_members = total_instructors = active_memberships = today_checkins_count = 0
@@ -314,12 +345,10 @@ def manager_members(request):
     try:
         with connection.cursor() as cursor:
             cursor.execute("""
-                SELECT m.memberid, m.name, m.email, m.phone, m.registrationdate, m.isactive,
-                       ms.startdate, ms.enddate, p.name as plan_name
-                FROM member m
-                LEFT JOIN membersubscription ms ON m.memberid = ms.memberid AND ms.isactive = true
-                LEFT JOIN plan p ON ms.planid = p.planid
-                ORDER BY m.registrationdate DESC
+                SELECT memberid, name, email, phone, registrationdate, isactive,
+                       startdate, enddate, plan_name
+                FROM vw_all_members
+                ORDER BY registrationdate DESC
             """)
             
             members = cursor.fetchall()
@@ -345,13 +374,10 @@ def manager_classes(request):
     try:
         with connection.cursor() as cursor:
             cursor.execute("""
-                SELECT cs.classscheduleid, c.name, i.name as instructor_name, 
-                       cs.date, cs.starttime, cs.endtime, c.room, cs.maxparticipants
-                FROM classschedule cs
-                JOIN class c ON cs.classid = c.classid
-                JOIN instructor i ON c.instructorid = i.instructorid
-                WHERE cs.isactive = true
-                ORDER BY cs.date, cs.starttime
+                SELECT classscheduleid, name, instructor_name, 
+                       date, starttime, endtime, room, maxparticipants
+                FROM vw_all_classes
+                ORDER BY date, starttime
             """)
             
             classes = cursor.fetchall()
@@ -370,17 +396,16 @@ def manager_classes(request):
 def manager_checkins(request):
     user_data = get_user_data(request)
     
-   # if user_data['user_type_id'] != 1:
-   #     messages.error(request, 'Acesso negado.')
-   #     return redirect('login')
+    if user_data['user_type_id'] != 1:
+        messages.error(request, 'Acesso negado.')
+        return redirect('login')
     
     try:
         with connection.cursor() as cursor:
             cursor.execute("""
-                SELECT c.checkinid, m.name, c.date, c.entrancetime, c.exittime
-                FROM checkin c
-                JOIN member m ON c.memberid = m.memberid
-                ORDER BY c.date DESC, c.entrancetime DESC
+                SELECT checkinid, name, date, entrancetime, exittime
+                FROM vw_all_checkins
+                ORDER BY date DESC, entrancetime DESC
                 LIMIT 100
             """)
             
@@ -407,11 +432,10 @@ def manager_machines(request):
     try:
         with connection.cursor() as cursor:
             cursor.execute("""
-                SELECT m.machineid, m.name, m.type, m.manufacturer, m.model, 
-                       ms.status, m.installationdate, m.maintenancedate
-                FROM machine m
-                JOIN machinestatus ms ON m.machinestatusid = ms.machinestatusid
-                ORDER BY m.name
+                SELECT machineid, name, type, manufacturer, model, 
+                       status, installationdate, maintenancedate
+                FROM vw_machines
+                ORDER BY name
             """)
             
             machines = cursor.fetchall()
@@ -437,13 +461,10 @@ def manager_payments(request):
     try:
         with connection.cursor() as cursor:
             cursor.execute("""
-                SELECT p.paymentid, m.name as member_name, pl.name as plan_name,
-                       p.amount, p.duedate, p.paymentdate, p.ispayed, p.paymentmethod
-                FROM payment p
-                JOIN membersubscription ms ON p.subscriptionid = ms.subscriptionid
-                JOIN member m ON ms.memberid = m.memberid
-                JOIN plan pl ON ms.planid = pl.planid
-                ORDER BY p.duedate DESC
+                SELECT paymentid, member_name, plan_name,
+                       amount, duedate, paymentdate, ispayed, paymentmethod
+                FROM vw_payments
+                ORDER BY duedate DESC
             """)
             
             payments = cursor.fetchall()
@@ -470,7 +491,7 @@ def manager_plans(request):
         with connection.cursor() as cursor:
             cursor.execute("""
                 SELECT planid, name, monthlyprice, access24h, description, isactive
-                FROM plan
+                FROM vw_plans
                 ORDER BY monthlyprice
             """)
             

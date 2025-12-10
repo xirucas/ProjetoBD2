@@ -29,8 +29,8 @@
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            
-            <!-- Menu para Membros {% if user_data.user_type_id == 3 %}-->
+
+           {% if user_data.user_type_id == 3 %}
             <div class="collapse navbar-collapse nav-section" id="memberNav">
                 <ul class="navbar-nav">
                     <li class="nav-item">
@@ -42,7 +42,7 @@
                 </ul>
             </div>
 
-            <!-- Menu para Instrutores  {% elif user_data.user_type_id == 2 %}-->
+            {% elif user_data.user_type_id == 2 %}
             <div class="collapse navbar-collapse nav-section" id="instructorNav">
                 <ul class="navbar-nav">
                     <li class="nav-item">
@@ -54,7 +54,7 @@
                 </ul>
             </div>
 
-<!-- Menu para Gerentes  {% elif user_data.user_type_id == 1 %}-->
+            {% elif user_data.user_type_id == 1 %}
             <div class="collapse navbar-collapse nav-section" id="managerNav">
                 <ul class="navbar-nav">
                     <li class="nav-item">
@@ -81,17 +81,17 @@
                 </ul>
             </div>
 
-<!--{% endif %}-->
 
+            {% endif %}
             <!-- Informações do usuário e Logout -->
             <div class="ms-auto">
                 <ul class="navbar-nav">
-                    {% if user.is_authenticated %}
+                    {% if user_data.is_authenticated %}
                         <li class="nav-item">
                             <span class="navbar-text me-3">
-                                Olá, {{ user.first_name|default:user.username }}
-                                {% if user.user_type %}
-                                    <small class="text-muted">({{ user.get_user_type_display|default:user.user_type }})</small>
+                                Olá, {{ user_data.user_name}}
+                                {% if user_data.user_type %}
+                                    <small class="text-muted">({{ user_data.get_user_type_display|default:user_data.user_type }})</small>
                                 {% endif %}
                             </span>
                         </li>

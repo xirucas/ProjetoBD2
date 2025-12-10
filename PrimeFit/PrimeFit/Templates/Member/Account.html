@@ -8,20 +8,8 @@
     <button class="btn btn-primary">Editar Perfil</button>
 </div>
 
-<!-- Informações do Membro -->
-<div class="row mb-4">
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-body text-center">
-                <img src="https://via.placeholder.com/150" class="rounded-circle mb-3" alt="Foto do Membro">
-                <h4>João Silva</h4>
-                <p class="text-muted">Membro ID: 1001</p>
-                <span class="badge bg-primary">Plano Básico</span>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-md-8">
+
+    <div class="mb-4">
         <div class="card">
             <div class="card-header">
                 <h5>Informações Pessoais</h5>
@@ -29,22 +17,21 @@
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-6">
-                        <p><strong>Nome Completo:</strong> João Carlos Silva</p>
-                        <p><strong>Email:</strong> joao.silva@email.com</p>
-                        <p><strong>Telefone:</strong> +351 911 123 456</p>
-                        <p><strong>Data de Nascimento:</strong> 25/06/1990</p>
+                        <p><strong>Nome Completo:</strong> {{ member_details.name }}</p>
+                        <p><strong>Email:</strong> {{ member_details.email }}</p>
+                        <p><strong>Telefone:</strong> {{ member_details.phone }}</p>
+                        <p><strong>Data de Nascimento:</strong> {{ member_details.birthdate }}</p>
                     </div>
                     <div class="col-md-6">
-                        <p><strong>Morada:</strong> Rua das Flores, 123</p>
-                        <p><strong>Cidade:</strong> Lisboa</p>
-                        <p><strong>Código Postal:</strong> 1000-100</p>
-                        <p><strong>Contacto de Emergência:</strong> +351 912 987 654</p>
+                        <p><strong>Morada:</strong> {{ member_details.address }}</p>
+                        <p><strong>Cidade:</strong> {{ member_details.city }}</p>
+                        <p><strong>Código Postal:</strong> {{ member_details.postalcode }}</p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+
 
 <!-- Informações da Membership -->
 <div class="card mb-4">
@@ -81,57 +68,7 @@
         <hr>
         <div class="row">
             <div class="col-md-12">
-                <h6>Benefícios do Plano Básico:</h6>
-                <ul class="list-unstyled">
-                    <li><i class="fas fa-check text-success"></i> Acesso ao ginásio</li>
-                    <li><i class="fas fa-check text-success"></i> Área de musculação</li>
-                    <li><i class="fas fa-check text-success"></i> Vestiários</li>
-                    <li><i class="fas fa-times text-danger"></i> Aulas de grupo</li>
-                    <li><i class="fas fa-times text-danger"></i> Personal trainer</li>
-                    <li><i class="fas fa-times text-danger"></i> Área VIP</li>
-                </ul>
-                <button class="btn btn-warning">Upgrade para Premium</button>
                 <button class="btn btn-outline-info">Ver Outros Planos</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Estatísticas Mensais -->
-<div class="row mb-4">
-    <div class="col-md-3">
-        <div class="card bg-primary text-white">
-            <div class="card-body">
-                <h5>Check-ins</h5>
-                <h2>12</h2>
-                <small>Este mês</small>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card bg-success text-white">
-            <div class="card-body">
-                <h5>Tempo Total</h5>
-                <h2>18h</h2>
-                <small>De treino</small>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card bg-warning text-white">
-            <div class="card-body">
-                <h5>Aulas</h5>
-                <h2>0</h2>
-                <small>Não incluídas no plano</small>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card bg-info text-white">
-            <div class="card-body">
-                <h5>Frequência</h5>
-                <h2>3x</h2>
-                <small>Por semana</small>
             </div>
         </div>
     </div>
@@ -162,20 +99,6 @@
                         <td><span class="badge bg-success">Pago</span></td>
                         <td><button class="btn btn-sm btn-outline-primary">Download</button></td>
                     </tr>
-                    <tr>
-                        <td>15/09/2024</td>
-                        <td>€25.00</td>
-                        <td>MB Way</td>
-                        <td><span class="badge bg-success">Pago</span></td>
-                        <td><button class="btn btn-sm btn-outline-primary">Download</button></td>
-                    </tr>
-                    <tr>
-                        <td>15/08/2024</td>
-                        <td>€25.00</td>
-                        <td>Dinheiro</td>
-                        <td><span class="badge bg-success">Pago</span></td>
-                        <td><button class="btn btn-sm btn-outline-primary">Download</button></td>
-                    </tr>
                 </tbody>
             </table>
         </div>
@@ -196,7 +119,6 @@
                         <th>Check-in</th>
                         <th>Check-out</th>
                         <th>Duração</th>
-                        <th>Atividade</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -205,35 +127,6 @@
                         <td>18:30</td>
                         <td>20:15</td>
                         <td>1h 45min</td>
-                        <td>Musculação</td>
-                    </tr>
-                    <tr>
-                        <td>26/10/2024</td>
-                        <td>19:00</td>
-                        <td>20:30</td>
-                        <td>1h 30min</td>
-                        <td>Cardio</td>
-                    </tr>
-                    <tr>
-                        <td>25/10/2024</td>
-                        <td>19:15</td>
-                        <td>20:45</td>
-                        <td>1h 30min</td>
-                        <td>Musculação</td>
-                    </tr>
-                    <tr>
-                        <td>23/10/2024</td>
-                        <td>18:45</td>
-                        <td>20:00</td>
-                        <td>1h 15min</td>
-                        <td>Cardio</td>
-                    </tr>
-                    <tr>
-                        <td>21/10/2024</td>
-                        <td>07:30</td>
-                        <td>09:00</td>
-                        <td>1h 30min</td>
-                        <td>Musculação</td>
                     </tr>
                 </tbody>
             </table>
@@ -241,56 +134,5 @@
     </div>
 </div>
 
-<!-- Configurações da Conta -->
-<div class="card">
-    <div class="card-header">
-        <h5>Configurações da Conta</h5>
-    </div>
-    <div class="card-body">
-        <div class="row">
-            <div class="col-md-6">
-                <h6>Notificações</h6>
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="emailNotifications" checked>
-                    <label class="form-check-label" for="emailNotifications">
-                        Notificações por email
-                    </label>
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="smsNotifications">
-                    <label class="form-check-label" for="smsNotifications">
-                        Notificações por SMS
-                    </label>
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="paymentReminders" checked>
-                    <label class="form-check-label" for="paymentReminders">
-                        Lembretes de pagamento
-                    </label>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <h6>Privacidade</h6>
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="shareStats">
-                    <label class="form-check-label" for="shareStats">
-                        Partilhar estatísticas de treino
-                    </label>
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="publicProfile">
-                    <label class="form-check-label" for="publicProfile">
-                        Perfil público
-                    </label>
-                </div>
-            </div>
-        </div>
-        <hr>
-        <div class="mt-3">
-            <button class="btn btn-success">Guardar Configurações</button>
-            <button class="btn btn-outline-secondary">Cancelar</button>
-            <button class="btn btn-outline-danger float-end">Cancelar Membership</button>
-        </div>
-    </div>
-</div>
+
 {% endblock %}
