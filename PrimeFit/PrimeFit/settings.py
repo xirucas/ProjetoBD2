@@ -90,10 +90,34 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': get_env('POSTGRES_DB', 'primefit_db'),
-        'USER': get_env('POSTGRES_USER', 'postgres'),
+        'USER': get_env('POSTGRES_USER'),
+        'PASSWORD': get_env('POSTGRES_PASSWORD'),
+        'HOST': get_env('POSTGRES_HOST'),
+        'PORT': get_env('POSTGRES_PORT'),
+    },
+    'instructor': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': get_env('POSTGRES_DB', 'primefit_db'),
+        'USER': get_env('POSTGRES_USERINSTRUCTOR'),
+        'PASSWORD': get_env('POSTGRES_PASSWORD'),
+        'HOST': get_env('POSTGRES_HOST'),
+        'PORT': get_env('POSTGRES_PORT'),
+    },
+    'member': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': get_env('POSTGRES_DB', 'primefit_db'),
+        'USER': get_env('POSTGRES_USERINSTRUCTOR'),
+        'PASSWORD': get_env('POSTGRES_PASSWORD'),
+        'HOST': get_env('POSTGRES_HOST'),
+        'PORT': get_env('POSTGRES_PORT'),
+    },
+    'admin': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': get_env('POSTGRES_DB', 'primefit_db'),
+        'USER': get_env('POSTGRES_USERADMIN'),
         'PASSWORD': get_env('POSTGRES_PASSWORD', ''),
-        'HOST': get_env('POSTGRES_HOST', 'localhost'),
-        'PORT': get_env('POSTGRES_PORT', '5432'),
+        'HOST': get_env('POSTGRES_HOST'),
+        'PORT': get_env('POSTGRES_PORT'),
     }
 }
 
