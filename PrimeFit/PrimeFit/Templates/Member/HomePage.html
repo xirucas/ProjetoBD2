@@ -41,7 +41,7 @@
         <div class="card bg-info text-white">
             <div class="card-body">
                 <h5>Próximo Pagamento</h5>
-                <h2>{{ member_resume.next_payment }}</h2>
+                <h2>{{ member_resume.next_payment |date:"d/m/Y"}}</h2>
                 <small>{{ member_resume.payment_price }}</small>
             </div>
         </div>
@@ -61,9 +61,9 @@
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
                             <h6>{{ class.class_name }}</h6>
-                            <p class="text-muted mb-1">Instrutor: {{ class.instructor }}</p>
-                            <p class="text-muted mb-1">{{ class.date }}, {{ class.start_time }} - {{ class.end_time }}</p>
-                            <p class="text-muted mb-0">Sala {{ class.room }}</p>
+                            <p class="text-muted mb-1">Instrutor: {{ class.instructor_name }}</p>
+                            <p class="text-muted mb-1">{{ class.date |date:"d/m/Y"}}, {{ class.starttime }} - {{ class.endtime }}</p>
+                            <p class="text-muted mb-0">{{ class.room }}</p>
                         </div>
                         <div>
                             <span class="badge bg-success">Confirmado</span>
@@ -104,13 +104,17 @@
                 <tbody>
                     {% for class in available_classes %}
                     <tr>
-                        <td>{{ class.start_time }}</td>
+                        <td>{{ class.starttime }}</td>
                         <td>{{ class.class_name }}</td>
-                        <td>{{ class.instructor }}</td>
+                        <td>{{ class.instructor_name }}</td>
                         <td>{{ class.room }}</td>
-                        <td>{{ class.available_slots }}</td>
+                        <td>{{ class.available_spots }}</td>
                         <td>
-                            <button class="btn btn-sm btn-success">Reservar</button>
+                            <form method="POST">
+                                {% csrf_token %}
+                                <input type="hidden" name="classscheduleid" value="{{ class.classscheduleid }}">
+                                <button type="submit" class="btn btn-sm btn-success {% if is_booking %}disabled{% endif %}">Reservar</button>
+                            </form>
                         </td>
                     </tr>
                     {% endfor %}

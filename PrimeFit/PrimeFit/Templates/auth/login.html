@@ -17,13 +17,6 @@
                         <h2 class="text-primary">PrimeFit</h2>
                         <p class="text-secondary">Entre na sua conta</p>
                     </div>
-                    {% if messages %}
-                        {% for message in messages %}
-                            <div class="primefit-alert primefit-alert-{% if message.tags == 'error' %}error{% else %}{{ message.tags }}{% endif %}">
-                                {{ message }}
-                            </div>
-                        {% endfor %}
-                    {% endif %}
 
                     <form method="post" class="text-left">
                         {% csrf_token %}

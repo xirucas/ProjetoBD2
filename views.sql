@@ -1,3 +1,23 @@
+DROP VIEW IF EXISTS vw_user_authentication;
+DROP VIEW IF EXISTS vw_email_exists;
+DROP VIEW IF EXISTS vw_plan;
+DROP VIEW IF EXISTS vw_member_data;
+DROP VIEW IF EXISTS vw_member_stats_month;
+DROP VIEW IF EXISTS vw_member_schedule_classes;
+DROP VIEW IF EXISTS vw_member_available_classes;
+DROP VIEW IF EXISTS vw_classes_for_member;
+DROP VIEW IF EXISTS vw_member_account_details;
+DROP VIEW IF EXISTS vw_instructor_info;
+DROP VIEW IF EXISTS vw_instructor_classes;
+DROP VIEW IF EXISTS vw_class_schedules;
+DROP VIEW IF EXISTS vw_dashboard_stats;
+DROP VIEW IF EXISTS vw_all_members;
+DROP VIEW IF EXISTS vw_all_classes;
+DROP VIEW IF EXISTS vw_all_checkins;
+DROP VIEW IF EXISTS vw_machines;
+DROP VIEW IF EXISTS vw_member_payment_history;
+DROP VIEW IF EXISTS vw_member_checkin_history;
+
 -- View for user authentication with user type information
 CREATE OR REPLACE VIEW vw_user_authentication AS
 SELECT 
@@ -16,6 +36,10 @@ WHERE u.isactive = true;
 CREATE OR REPLACE VIEW vw_email_exists AS
 SELECT userid, email
 FROM users;
+
+CREATE OR REPLACE VIEW vw_plan AS 
+SELECT planid, name, monthlyprice, access24h
+FROM plan;
 
 -- View for member home page data
 CREATE OR REPLACE VIEW vw_member_data AS
@@ -69,14 +93,17 @@ SELECT
     cs.starttime, 
     cs.endtime,
     c.room,
-    u.name AS instructor_name
+    u.name AS instructor_name,
+    m.userid
 FROM classschedule cs
-JOIN class c ON cs.classid = c.classid
-JOIN instructor i ON c.instructorid = i.instructorid
-JOIN users u ON i.userid = u.userid
-WHERE cs.isactive = true;
+LEFT JOIN class c ON cs.classid = c.classid
+LEFT JOIN instructor i ON c.instructorid = i.instructorid
+LEFT JOIN users u ON i.userid = u.userid
+LEFT JOIN classbooking cb ON cs.classscheduleid = cb.classscheduleid
+LEFT JOIN member m ON cb.memberid = m.memberid
+WHERE cs.isactive = true and cs.date >= CURRENT_DATE;
 
--- View for classes available for a specific member (excluding already booked classes)
+-- View for classes available today (can be filtered by member to exclude already booked classes)
 CREATE OR REPLACE VIEW vw_member_available_classes AS
 SELECT 
     cs.classscheduleid,
@@ -87,13 +114,50 @@ SELECT
     u.name AS instructor_name,
     cs.date,
     cs.starttime,
+    cs.endtime,
+    cs.maxparticipants,
+    COALESCE(booking_count.total_bookings, 0) AS current_bookings,
     (cs.maxparticipants - COALESCE(booking_count.total_bookings, 0)) AS available_spots
 
 FROM classschedule cs
 JOIN class c ON cs.classid = c.classid AND c.isactive = true
 JOIN instructor i ON c.instructorid = i.instructorid
 JOIN users u ON i.userid = u.userid
-JOIN member m ON m.isactive = true
+LEFT JOIN (
+    SELECT 
+        classscheduleid, 
+        COUNT(*) as total_bookings
+    FROM classbooking 
+    GROUP BY classscheduleid
+) booking_count ON cs.classscheduleid = booking_count.classscheduleid
+WHERE cs.isactive = true 
+    AND cs.date = CURRENT_DATE 
+    AND cs.starttime > CURRENT_TIME
+    AND (cs.maxparticipants - COALESCE(booking_count.total_bookings, 0)) > 0;
+
+-- View for classes available for a specific member (excluding already booked classes)
+CREATE OR REPLACE VIEW vw_classes_for_member AS
+SELECT 
+    cs.classscheduleid,
+    c.name AS class_name, 
+    c.room, 
+    c.capacity, 
+    c.duration_minutes,
+    u.name AS instructor_name,
+    cs.date,
+    cs.starttime,
+    cs.endtime,
+    cs.maxparticipants,
+    COALESCE(booking_count.total_bookings, 0) AS current_bookings,
+    (cs.maxparticipants - COALESCE(booking_count.total_bookings, 0)) AS available_spots,
+    m.memberid,
+    m.userid
+
+FROM classschedule cs
+JOIN class c ON cs.classid = c.classid AND c.isactive = true
+JOIN instructor i ON c.instructorid = i.instructorid
+JOIN users u ON i.userid = u.userid
+CROSS JOIN member m
 LEFT JOIN (
     SELECT 
         classscheduleid, 
@@ -104,7 +168,8 @@ LEFT JOIN (
 LEFT JOIN classbooking existing_booking ON cs.classscheduleid = existing_booking.classscheduleid 
     AND existing_booking.memberid = m.memberid
 WHERE cs.isactive = true 
-    AND cs.date >= CURRENT_DATE
+    AND m.isactive = true
+    AND cs.date = CURRENT_DATE
     AND (cs.maxparticipants - COALESCE(booking_count.total_bookings, 0)) > 0
     AND existing_booking.bookingid IS NULL; 
 
@@ -125,6 +190,11 @@ SELECT
     m.registrationdate,
     ms.startdate, 
     ms.enddate, 
+    CASE 
+        WHEN pt.ispayed = true THEN NULL  -- Se já foi pago, retorna NULL
+        WHEN pt.duedate < CURRENT_DATE THEN NULL  -- Se está em atraso, não mostra
+        ELSE pt.duedate  -- Só mostra pagamentos futuros pendentes
+    END as next_payment_date,
     p.name as plan_name, 
     p.monthlyprice, 
     p.access24h,
@@ -133,6 +203,10 @@ FROM member m
 LEFT JOIN membersubscription ms ON m.memberid = ms.memberid AND ms.isactive = true
 LEFT JOIN plan p ON ms.planid = p.planid
 LEFT JOIN users u ON m.userid = u.userid
+LEFT JOIN payment pt ON ms.subscriptionid = pt.subscriptionid 
+    AND pt.ispayed = false  -- Só pagamentos não pagos
+    AND pt.duedate >= CURRENT_DATE;  -- Só pagamentos futuros ou de hoje
+
 
 -- View for instructor account information
 CREATE OR REPLACE VIEW vw_instructor_info AS
@@ -273,3 +347,49 @@ SELECT
     description, 
     isactive
 FROM plan;
+
+-- View for member payment history
+CREATE OR REPLACE VIEW vw_member_payment_history AS
+SELECT 
+    p.paymentid,
+    p.duedate as payment_date,
+    p.amount as payment_amount,
+    p.paymentmethod,
+    CASE 
+        WHEN p.ispayed = true THEN 'Pago'
+        WHEN p.duedate < CURRENT_DATE THEN 'Em Atraso'
+        ELSE 'Pendente'
+    END as payment_status,
+    p.paymentdate,
+    ms.memberid,
+    m.userid
+FROM payment p
+JOIN membersubscription ms ON p.subscriptionid = ms.subscriptionid
+JOIN member m ON ms.memberid = m.memberid
+ORDER BY p.duedate DESC;
+
+-- View for member checkin history
+CREATE OR REPLACE VIEW vw_member_checkin_history AS
+SELECT 
+    c.checkinid,
+    c.date as checkin_date,
+    c.entrancetime,
+    c.exittime,
+    CASE 
+        WHEN c.exittime IS NOT NULL THEN 
+            EXTRACT(EPOCH FROM (c.exittime - c.entrancetime)) / 3600
+        ELSE NULL
+    END as duration_hours,
+    CASE 
+        WHEN c.exittime IS NOT NULL THEN 
+            CONCAT(
+                EXTRACT(HOUR FROM (c.exittime - c.entrancetime)), 'h ',
+                LPAD(EXTRACT(MINUTE FROM (c.exittime - c.entrancetime))::text, 2, '0'), 'min'
+            )
+        ELSE 'Em curso'
+    END as duration_formatted,
+    c.memberid,
+    m.userid
+FROM checkin c
+JOIN member m ON c.memberid = m.memberid
+ORDER BY c.date DESC, c.entrancetime DESC;

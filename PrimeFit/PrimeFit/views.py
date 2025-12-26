@@ -2,10 +2,14 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.db import connection
 from django.contrib.auth.hashers import make_password, check_password
-import logging
+from .models import (
+    UserAuthentication, Plan, EmailExists, MemberStatsMonth, 
+    MemberScheduleClasses, MemberAvailableClasses, MemberAccountDetails,
+    InstructorInfo, InstructorClasses, ClassSchedules, DashboardStats,
+    AllMembers, AllClasses, AllCheckins, Machines, Payments, Plans,
+    MemberPaymentHistory, MemberCheckinHistory
+)
 
-# Configure logging
-logger = logging.getLogger(__name__)
 
 # Autenticação usando tabela USERS do PostgreSQL
 def login_view(request):
@@ -17,38 +21,32 @@ def login_view(request):
             messages.error(request, 'Email e password são obrigatórios.')
             return render(request, 'auth/login.html')
         
-        # Verificar credenciais usando a view vw_user_authentication
+        # Verificar credenciais usando o model UserAuthentication
         try:
-            with connection.cursor() as cursor:
-                cursor.execute("""
-                    SELECT userid, email, name, password, usertypeid, isactive, user_type_label
-                    FROM vw_user_authentication
-                    WHERE email = %s
-                """, [email])
+            user_data = UserAuthentication.objects.filter(email=email).first()
+            
+            if user_data and check_password(password, user_data.password):
+                # Criar sessão de usuário
+                request.session['user_id'] = user_data.userid
+                request.session['email'] = user_data.email
+                request.session['user_name'] = user_data.name
+                request.session['user_type_id'] = user_data.usertypeid
+                request.session['user_type'] = user_data.user_type_label
+                request.session['is_authenticated'] = True
                 
-                user_data = cursor.fetchone()
+                # Atualizar last_login usando procedimento armazenado
+                with connection.cursor() as cursor:
+                    cursor.execute("CALL sp_update_last_login(%s)", [user_data.userid])
                 
-                if user_data and check_password(password, user_data[3]):
-                    # Criar sessão de usuário
-                    request.session['user_id'] = user_data[0]
-                    request.session['email'] = user_data[1]
-                    request.session['user_name'] = user_data[2]
-                    request.session['user_type_id'] = user_data[4]
-                    request.session['user_type'] = user_data[6]
-                    request.session['is_authenticated'] = True
-                    
-                    # Atualizar last_login usando procedimento armazenado
-                    cursor.execute("CALL sp_update_last_login(%s)", [user_data[0]])
-                    
-                    # Redirecionar baseado no tipo de usuário
-                    if user_data[4] == 1:  # Gestor
-                        return redirect('manager_dashboard')
-                    elif user_data[4] == 2:  # Instrutor
-                        return redirect('instructor_account')
-                    else:  # Membro
-                        return redirect('member_home')
-                else:
-                    messages.error(request, 'Email ou password incorretos.')
+                # Redirecionar baseado no tipo de usuário
+                if user_data.usertypeid == 1:  # Gestor
+                    return redirect('manager_dashboard')
+                elif user_data.usertypeid == 2:  # Instrutor
+                    return redirect('instructor_account')
+                else:  # Membro
+                    return redirect('member_home')
+            else:
+                messages.error(request, 'Email ou password incorretos.')
                     
         except Exception as e:
             messages.error(request, f'Erro no login: {str(e)}')
@@ -62,6 +60,16 @@ def logout_view(request):
     return redirect('login')
 
 def register_view(request):
+    try:
+        plans = list(Plan.objects.values('planid', 'name', 'monthlyprice', 'access24h'))
+    except Exception as e:
+        plans = []
+        messages.error(request, f'Erro ao carregar planos: {str(e)}')
+
+    context = {
+        'plans': plans
+    }
+
     if request.method == 'POST':
         name = request.POST.get('name', '')
         email = request.POST.get('email')
@@ -70,63 +78,33 @@ def register_view(request):
         nif = request.POST.get('nif', '')
         phone = request.POST.get('phone', '')
         iban = request.POST.get('iban', '')
-        birth_date = request.POST.get('birth_date', '')
+        birth_date = request.POST.get('birthdate', '')
         gender = request.POST.get('gender', '')
         address = request.POST.get('address', '')
         city = request.POST.get('city', '')
-        postal_code = request.POST.get('postal_code', '')
+        postal_code = request.POST.get('postalcode', '')
+        plan = request.POST.get('plan', '')
         user_type = request.POST.get('user_type', '3')  # Default to 'Member' type
-        
-        if not email or not password:
-            messages.error(request, 'Email e password são obrigatórios.')
-            return render(request, 'auth/register.html')
-            
-        if password != confirm_password:
-            messages.error(request, 'As passwords não coincidem.')
-            return render(request, 'auth/register.html')
-            
-        if len(password) < 8:
-            messages.error(request, 'A password deve ter pelo menos 8 caracteres.')
-            return render(request, 'auth/register.html')
-
-        if not birth_date:
-            messages.error(request, 'Data de nascimento é obrigatória.')
-            return render(request, 'auth/register.html')
-
-        if not gender:
-            messages.error(request, 'Gênero é obrigatório.')
-            return render(request, 'auth/register.html')
-
-        if not address:
-            messages.error(request, 'Endereço é obrigatório.')
-            return render(request, 'auth/register.html')
-
-        if not city:
-            messages.error(request, 'Cidade é obrigatória.')
-            return render(request, 'auth/register.html')
-
-        if not postal_code:
-            messages.error(request, 'Código postal é obrigatório.')
-            return render(request, 'auth/register.html')
 
         try:
+            # Verificar se email já existe usando model
+            if EmailExists.objects.filter(email=email).exists():
+                messages.error(request, 'Este email já está registado.')
+                return render(request, 'auth/register.html', context)
+            
+            # Criar novo usuário
+            hashed_password = make_password(password)
             with connection.cursor() as cursor:
-                # Verificar se email já existe usando vista
-                cursor.execute("SELECT userid, email FROM vw_email_exists WHERE email = %s", [email])
-                if cursor.fetchone():
-                    messages.error(request, 'Este email já está registado.')
-                    return render(request, 'auth/register.html')
-                
-                # Criar novo usuário
-                hashed_password = make_password(password)
-                cursor.execute("CALL sp_create_member(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", [name, hashed_password, nif, email, phone, iban, birth_date, gender, address, city, postal_code])
-                messages.success(request, 'Conta criada com sucesso! Pode fazer login.')
-                return redirect('login')
+                cursor.execute("CALL sp_create_member(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", 
+                             [name, hashed_password, nif, email, phone, iban, birth_date, gender, address, city, postal_code, plan])
+            messages.success(request, 'Conta criada com sucesso! Pode fazer login.')
+            return redirect('login')
                 
         except Exception as e:
             messages.error(request, f'Erro ao criar conta: {str(e)}')
-    
-    return render(request, 'auth/register.html')
+            return render(request, 'auth/register.html', context)
+
+    return render(request, 'auth/register.html', context)
 
 # Decorator customizado para verificar autenticação
 def custom_login_required(function):
@@ -159,41 +137,64 @@ def member_home(request):
     payment_price = ""
     schedule_classes = []
     available_classes = []
+    is_booking = False
+    
     try:
+        # Buscar estatísticas usando model
+        stats = MemberStatsMonth.objects.filter(userid=user_data['userid']).first()
+        if stats:
+            recent_checkins = stats.checkin_count or 0
+            month_classes_frequented = stats.class_bookings or 0
+            total_hours = round(stats.total_hours or 0)
+            next_payment = stats.next_payment if stats.next_payment else "Pagamento em dia"
+            payment_price = f"{round(stats.payment_price, 2)}€" if stats.next_payment and stats.payment_price else "0.00€"
+
+        # Buscar aulas agendadas usando model
+        schedule_classes_data = MemberScheduleClasses.objects.filter(userid=user_data['userid'])
+        schedule_classes = list(schedule_classes_data.values(
+            'class_name', 'date', 'starttime', 'endtime', 'room', 'instructor_name'
+        ))
+
+        # Buscar aulas disponíveis usando raw query (mais complexa)
         with connection.cursor() as cursor:
-            # Buscar check-ins recentes usando vista
             cursor.execute("""
-                SELECT checkin_count, class_bookings, total_hours, next_payment, payment_price
-                FROM vw_member_stats_month
-                WHERE userid = %s
+                SELECT classscheduleid, class_name, date, starttime, endtime, room, instructor_name, available_spots
+                FROM vw_member_available_classes vac
+                WHERE NOT EXISTS (
+                    SELECT 1 FROM classbooking cb 
+                    WHERE cb.classscheduleid = vac.classscheduleid 
+                    AND cb.memberid = (SELECT memberid FROM member WHERE userid = %s)
+                )
             """, [user_data['userid']])
 
-            stats = cursor.fetchone()
-            recent_checkins = stats[0]
-            month_classes_frequented = stats[1]
-            total_hours = round(stats[2])
-            next_payment = stats[3] if stats[3] else "Pagamento em dia"
-            payment_price = round(stats[4], 2) if stats[3] else "0.00€"
-
-            cursor.execute("""
-                SELECT classscheduleid, class_name, date, starttime, endtime, room
-                FROM vw_member_schedule_classes
-                WHERE userid = %s
-            """, [user_data['userid']])
-
-            schedule_classes = cursor.fetchall()
-
-            cursor.execute("""
-                SELECT classscheduleid, class_name, date, starttime, endtime, room, available_spots
-                FROM vw_member_available_classes
-                WHERE userid = %s
-            """, [user_data['userid']])
-
-            available_classes = cursor.fetchall()
+            available_classes_raw = cursor.fetchall()
+            available_classes = []
+            for row in available_classes_raw:
+                available_classes.append({
+                    'classscheduleid': row[0],
+                    'class_name': row[1],
+                    'date': row[2],
+                    'starttime': row[3],
+                    'endtime': row[4],
+                    'room': row[5],
+                    'instructor_name': row[6],
+                    'available_spots': row[7]
+                })
 
     except Exception as e:
         messages.error(request, f'Erro ao carregar dados: {str(e)}')
     
+    if request.method == 'POST':
+        is_booking = True
+        classscheduleid = request.POST.get('classscheduleid')
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("CALL sp_book_class(%s, %s)", [user_data['userid'], classscheduleid])
+                messages.success(request, 'Aula reservada com sucesso!')
+                return redirect('member_home')
+        except Exception as e:
+            messages.error(request, f'Erro ao reservar aula: {str(e)}')
+
     context = {
         'user_data': user_data,
         'member_resume': {
@@ -204,7 +205,8 @@ def member_home(request):
             'payment_price': payment_price
         },
         'schedule_classes': schedule_classes,
-        'available_classes': available_classes
+        'available_classes': available_classes,
+        'is_booking': is_booking
     }
     return render(request, 'Member/HomePage.html', context)
 
@@ -217,23 +219,30 @@ def member_account(request):
         return redirect('login')
     
     try:
-        with connection.cursor() as cursor:
-            cursor.execute("""
-                SELECT memberid, name, nif, email, phone, iban, birthdate, gender, address, city, postalcode, registrationdate,
-                       startdate, enddate, plan_name, monthlyprice, access24h
-                FROM vw_member_account_details
-                WHERE userid = %s
-            """, [user_data['userid']])
-            
-            member_details = cursor.fetchone()
+        # Using Django ORM with the model
+        member_details = MemberAccountDetails.objects.filter(userid=user_data['userid']).first()
+        
+        # Buscar histórico de pagamentos do membro
+        payment_history = MemberPaymentHistory.objects.filter(
+            userid=user_data['userid']
+        ).order_by('-payment_date')[:10]  # Últimos 10 pagamentos
+        
+        # Buscar histórico de check-ins do membro
+        checkin_history = MemberCheckinHistory.objects.filter(
+            userid=user_data['userid']
+        ).order_by('-checkin_date', '-entrancetime')[:15]  # Últimos 15 check-ins
     
     except Exception as e:
         member_details = None
+        payment_history = []
+        checkin_history = []
         messages.error(request, f'Erro ao carregar dados da conta: {str(e)}')
     
     context = {
         'user_data': user_data,
-        'member_details': member_details
+        'member_details': member_details,
+        'payment_history': payment_history,
+        'checkin_history': checkin_history
     }
     return render(request, 'Member/Account.html', context)
 
@@ -247,23 +256,13 @@ def instructor_account(request):
         return redirect('login')
 
     try:
-        with connection.cursor() as cursor:
-            cursor.execute("""
-                SELECT instructorid, name, nif, email, phone, isactive
-                FROM vw_instructor_info
-                WHERE userid = %s
-            """, [user_data['userid']])
-            
-            instructor_info = cursor.fetchone()
-            
-            # Buscar aulas do instrutor usando vista
-            cursor.execute("""
-                SELECT classid, name, room, capacity, duration_minutes
-                FROM vw_instructor_classes
-                WHERE userid = %s
-            """, [user_data['userid']])
-            
-            classes = cursor.fetchall()
+        # Buscar informações do instrutor usando model
+        instructor_info = InstructorInfo.objects.filter(userid=user_data['userid']).first()
+        
+        # Buscar aulas do instrutor usando model
+        classes = InstructorClasses.objects.filter(userid=user_data['userid']).values(
+            'classid', 'name', 'room', 'capacity', 'duration_minutes'
+        )
     
     except Exception as e:
         instructor_info = None
@@ -273,7 +272,7 @@ def instructor_account(request):
     context = {
         'user_data': user_data,
         'instructor_info': instructor_info,
-        'classes': classes
+        'classes': list(classes)
     }
     return render(request, 'Instructor/Account.html', context)
 
@@ -282,17 +281,12 @@ def instructor_class_management(request):
     user_data = get_user_data(request)
     
     try:
-        with connection.cursor() as cursor:
-            # Buscar horários das aulas do instrutor usando vista
-            cursor.execute("""
-                SELECT classscheduleid, name, date, starttime, endtime, 
-                       maxparticipants, room
-                FROM vw_class_schedules
-                WHERE userid = %s
-                ORDER BY date, starttime
-            """, [user_data['userid']])
-            
-            class_schedules = cursor.fetchall()
+        # Buscar horários das aulas do instrutor usando model
+        class_schedules = ClassSchedules.objects.filter(
+            userid=user_data['userid']
+        ).order_by('date', 'starttime').values(
+            'classscheduleid', 'name', 'date', 'starttime', 'endtime', 'maxparticipants', 'room'
+        )
     
     except Exception as e:
         class_schedules = []
@@ -300,7 +294,7 @@ def instructor_class_management(request):
     
     context = {
         'user_data': user_data,
-        'class_schedules': class_schedules
+        'class_schedules': list(class_schedules)
     }
     return render(request, 'Instructor/ClassManagement.html', context)
 
@@ -309,17 +303,16 @@ def instructor_class_management(request):
 def manager_dashboard(request):
     user_data = get_user_data(request)
     
-    # Verificar se é gestor
-    # if user_data['user_type_id'] != 1:
-    #    messages.error(request, 'Acesso negado. Apenas gestores podem aceder ao dashboard.')
-    #    return redirect('login')
-    
     try:
-        with connection.cursor() as cursor:
-            # Buscar estatísticas usando vista
-            cursor.execute("SELECT total_members, total_instructors, active_memberships, today_checkins FROM vw_dashboard_stats")
-            stats = cursor.fetchone()
-            total_members, total_instructors, active_memberships, today_checkins_count = stats
+        # Buscar estatísticas usando model
+        stats = DashboardStats.objects.first()
+        if stats:
+            total_members = stats.total_members
+            total_instructors = stats.total_instructors
+            active_memberships = stats.active_memberships
+            today_checkins_count = stats.today_checkins
+        else:
+            total_members = total_instructors = active_memberships = today_checkins_count = 0
     
     except Exception as e:
         total_members = total_instructors = active_memberships = today_checkins_count = 0
@@ -337,21 +330,12 @@ def manager_dashboard(request):
 @custom_login_required
 def manager_members(request):
     user_data = get_user_data(request)
-    
-    #if user_data['user_type_id'] != 1:
-    #    messages.error(request, 'Acesso negado.')
-    #    return redirect('login')
 
     try:
-        with connection.cursor() as cursor:
-            cursor.execute("""
-                SELECT memberid, name, email, phone, registrationdate, isactive,
-                       startdate, enddate, plan_name
-                FROM vw_all_members
-                ORDER BY registrationdate DESC
-            """)
-            
-            members = cursor.fetchall()
+        members = AllMembers.objects.order_by('-registrationdate').values(
+            'memberid', 'name', 'email', 'phone', 'registrationdate', 'isactive',
+            'startdate', 'enddate', 'plan_name'
+        )
     
     except Exception as e:
         members = []
@@ -359,7 +343,7 @@ def manager_members(request):
     
     context = {
         'user_data': user_data,
-        'members': members
+        'members': list(members)
     }
     return render(request, 'Manager/Members.html', context)
 
@@ -367,20 +351,10 @@ def manager_members(request):
 def manager_classes(request):
     user_data = get_user_data(request)
     
-   # if user_data['user_type_id'] != 1:
-   #     messages.error(request, 'Acesso negado.')
-   #     return redirect('login')
-    
     try:
-        with connection.cursor() as cursor:
-            cursor.execute("""
-                SELECT classscheduleid, name, instructor_name, 
-                       date, starttime, endtime, room, maxparticipants
-                FROM vw_all_classes
-                ORDER BY date, starttime
-            """)
-            
-            classes = cursor.fetchall()
+        classes = AllClasses.objects.order_by('date', 'starttime').values(
+            'classscheduleid', 'name', 'instructor_name', 'date', 'starttime', 'endtime', 'room', 'maxparticipants'
+        )
     
     except Exception as e:
         classes = []
@@ -388,7 +362,7 @@ def manager_classes(request):
     
     context = {
         'user_data': user_data,
-        'classes': classes
+        'classes': list(classes)
     }
     return render(request, 'Manager/Classes.html', context)
 
@@ -401,15 +375,9 @@ def manager_checkins(request):
         return redirect('login')
     
     try:
-        with connection.cursor() as cursor:
-            cursor.execute("""
-                SELECT checkinid, name, date, entrancetime, exittime
-                FROM vw_all_checkins
-                ORDER BY date DESC, entrancetime DESC
-                LIMIT 100
-            """)
-            
-            checkins = cursor.fetchall()
+        checkins = AllCheckins.objects.order_by('-date', '-entrancetime').values(
+            'checkinid', 'name', 'date', 'entrancetime', 'exittime'
+        )[:100]  # Limitar a 100 registros
     
     except Exception as e:
         checkins = []
@@ -417,7 +385,7 @@ def manager_checkins(request):
     
     context = {
         'user_data': user_data,
-        'checkins': checkins
+        'checkins': list(checkins)
     }
     return render(request, 'Manager/Check-ins.html', context)
 
@@ -425,20 +393,10 @@ def manager_checkins(request):
 def manager_machines(request):
     user_data = get_user_data(request)
     
-   # if user_data['user_type_id'] != 1:
-   #     messages.error(request, 'Acesso negado.')
-   #     return redirect('login')
-    
     try:
-        with connection.cursor() as cursor:
-            cursor.execute("""
-                SELECT machineid, name, type, manufacturer, model, 
-                       status, installationdate, maintenancedate
-                FROM vw_machines
-                ORDER BY name
-            """)
-            
-            machines = cursor.fetchall()
+        machines = Machines.objects.order_by('name').values(
+            'machineid', 'name', 'type', 'manufacturer', 'model', 'status', 'installationdate', 'maintenancedate'
+        )
     
     except Exception as e:
         machines = []
@@ -446,7 +404,7 @@ def manager_machines(request):
     
     context = {
         'user_data': user_data,
-        'machines': machines
+        'machines': list(machines)
     }
     return render(request, 'Manager/Machines.html', context)
 
@@ -454,20 +412,10 @@ def manager_machines(request):
 def manager_payments(request):
     user_data = get_user_data(request)
     
-   # if user_data['user_type_id'] != 1:
-   #     messages.error(request, 'Acesso negado.')
-   #     return redirect('login')
-    
     try:
-        with connection.cursor() as cursor:
-            cursor.execute("""
-                SELECT paymentid, member_name, plan_name,
-                       amount, duedate, paymentdate, ispayed, paymentmethod
-                FROM vw_payments
-                ORDER BY duedate DESC
-            """)
-            
-            payments = cursor.fetchall()
+        payments = Payments.objects.order_by('-duedate').values(
+            'paymentid', 'member_name', 'plan_name', 'amount', 'duedate', 'paymentdate', 'ispayed', 'paymentmethod'
+        )
     
     except Exception as e:
         payments = []
@@ -475,7 +423,7 @@ def manager_payments(request):
     
     context = {
         'user_data': user_data,
-        'payments': payments
+        'payments': list(payments)
     }
     return render(request, 'Manager/Payments.html', context)
 
@@ -483,19 +431,10 @@ def manager_payments(request):
 def manager_plans(request):
     user_data = get_user_data(request)
     
-   # if user_data['user_type_id'] != 1:
-    #    messages.error(request, 'Acesso negado.')
-   #     return redirect('login')
-    
     try:
-        with connection.cursor() as cursor:
-            cursor.execute("""
-                SELECT planid, name, monthlyprice, access24h, description, isactive
-                FROM vw_plans
-                ORDER BY monthlyprice
-            """)
-            
-            plans = cursor.fetchall()
+        plans = Plans.objects.order_by('monthlyprice').values(
+            'planid', 'name', 'monthlyprice', 'access24h', 'description', 'isactive'
+        )
     
     except Exception as e:
         plans = []
@@ -503,6 +442,6 @@ def manager_plans(request):
     
     context = {
         'user_data': user_data,
-        'plans': plans
+        'plans': list(plans)
     }
     return render(request, 'Manager/Plans.html', context)

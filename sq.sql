@@ -157,7 +157,7 @@ CREATE TABLE MEMBERSUBSCRIPTION (
    PLANID               INTEGER              NOT NULL,
    MEMBERID             INTEGER              NOT NULL,
    STARTDATE            DATE                 NOT NULL DEFAULT CURRENT_DATE,
-   ENDDATE              DATE                 NULL,
+   ENDDATE              DATE                 NOT NULL,
    ISACTIVE             BOOLEAN              NOT NULL DEFAULT TRUE,
    CREATED_AT           TIMESTAMP            DEFAULT CURRENT_TIMESTAMP,
    UPDATED_AT           TIMESTAMP            DEFAULT CURRENT_TIMESTAMP,
@@ -383,4 +383,7 @@ INSERT INTO PLAN (NAME, MONTHLYPRICE, ACCESS24H, DESCRIPTION) VALUES
 
 select u.userid, m.memberid, u.email, u.password from users u 
 join member m on u.userid = m.userid
+
+
+SELECT * FROM classbooking
 
