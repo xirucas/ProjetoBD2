@@ -5,7 +5,6 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1>Minha Conta</h1>
-    <button class="btn btn-primary">Editar Perfil</button>
 </div>
 
 
@@ -20,7 +19,7 @@
                         <p><strong>Nome Completo:</strong> {{ member_details.name }}</p>
                         <p><strong>Email:</strong> {{ member_details.email }}</p>
                         <p><strong>Telefone:</strong> {{ member_details.phone }}</p>
-                        <p><strong>Data de Nascimento:</strong> {{ member_details.birthdate }}</p>
+                        <p><strong>Data de Nascimento:</strong> {{ member_details.birthdate |date:"d/m/Y" }}</p>
                     </div>
                     <div class="col-md-6">
                         <p><strong>Morada:</strong> {{ member_details.address }}</p>
@@ -42,33 +41,32 @@
         <div class="row">
             <div class="col-md-3">
                 <div class="text-center">
-                    <h3 class="text-primary">Básico</h3>
+                    <h3 class="text-primary">{{ member_details.plan_name }}</h3>
                     <p class="text-muted">Plano Atual</p>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="text-center">
-                    <h3 class="text-success">€25.00</h3>
+                    <h3 class="text-success">€{{ member_details.monthlyprice }}</h3>
                     <p class="text-muted">Mensalidade</p>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="text-center">
-                    <h3 class="text-info">15/08/2024</h3>
+                    <h3 class="text-info">{{ member_details.startdate |date:"d/m/Y" }}</h3>
                     <p class="text-muted">Data de Adesão</p>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="text-center">
-                    <h3 class="text-warning">15/11/2024</h3>
-                    <p class="text-muted">Próximo Pagamento</p>
+                    {% if member_details.next_payment_date %}
+                        <h3 class="text-warning">{{ member_details.next_payment_date }}</h3>
+                        <p class="text-muted">Próximo Pagamento</p>
+                    {% else %}
+                        <h3 class="text-success">Em dia</h3>
+                        <p class="text-muted">Status do Pagamento</p>
+                    {% endif %}
                 </div>
-            </div>
-        </div>
-        <hr>
-        <div class="row">
-            <div class="col-md-12">
-                <button class="btn btn-outline-info">Ver Outros Planos</button>
             </div>
         </div>
     </div>
@@ -80,28 +78,51 @@
         <h5>Histórico de Pagamentos</h5>
     </div>
     <div class="card-body">
-        <div class="table-responsive">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Data</th>
-                        <th>Valor</th>
-                        <th>Método</th>
-                        <th>Status</th>
-                        <th>Recibo</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>15/10/2024</td>
-                        <td>€25.00</td>
-                        <td>Cartão</td>
-                        <td><span class="badge bg-success">Pago</span></td>
-                        <td><button class="btn btn-sm btn-outline-primary">Download</button></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+        {% if payment_history %}
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Valor</th>
+                            <th>Método</th>
+                            <th>Status</th>
+                            <th>Data Pagamento</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for payment in payment_history %}
+                        <tr>
+                            <td>{{ payment.payment_date|date:"d/m/Y" }}</td>
+                            <td>€{{ payment.payment_amount }}</td>
+                            <td>{{ payment.paymentmethod|default:"N/A" }}</td>
+                            <td>
+                                {% if payment.payment_status == 'Pago' %}
+                                    <span class="badge bg-success">{{ payment.payment_status }}</span>
+                                {% elif payment.payment_status == 'Em Atraso' %}
+                                    <span class="badge bg-danger">{{ payment.payment_status }}</span>
+                                {% else %}
+                                    <span class="badge bg-warning">{{ payment.payment_status }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if payment.paymentdate %}
+                                    {{ payment.paymentdate|date:"d/m/Y" }}
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                Nenhum histórico de pagamentos encontrado.
+            </div>
+        {% endif %}
     </div>
 </div>
 
@@ -111,26 +132,47 @@
         <h5>Histórico de Check-ins Recentes</h5>
     </div>
     <div class="card-body">
-        <div class="table-responsive">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Data</th>
-                        <th>Check-in</th>
-                        <th>Check-out</th>
-                        <th>Duração</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>28/10/2024</td>
-                        <td>18:30</td>
-                        <td>20:15</td>
-                        <td>1h 45min</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+        {% if checkin_history %}
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Check-in</th>
+                            <th>Check-out</th>
+                            <th>Duração</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for checkin in checkin_history %}
+                        <tr>
+                            <td>{{ checkin.checkin_date|date:"d/m/Y" }}</td>
+                            <td>{{ checkin.entrancetime|time:"H:i" }}</td>
+                            <td>
+                                {% if checkin.exittime %}
+                                    {{ checkin.exittime|time:"H:i" }}
+                                {% else %}
+                                    <span class="badge bg-success">Ativo</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if checkin.duration_formatted %}
+                                    {{ checkin.duration_formatted }}
+                                {% else %}
+                                    <span class="text-muted">Em curso</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                Nenhum histórico de check-ins encontrado.
+            </div>
+        {% endif %}
     </div>
 </div>
 

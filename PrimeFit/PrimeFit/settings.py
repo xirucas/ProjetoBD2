@@ -40,6 +40,15 @@ DEBUG = get_env('DEBUG', True, cast=bool)
 
 ALLOWED_HOSTS = get_env('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
+# CSRF trusted origins for external domains like Cloudflare tunnels
+CSRF_TRUSTED_ORIGINS = [
+    'https://' + host for host in ALLOWED_HOSTS 
+    if not host.startswith('127.0.0.1') and not host.startswith('localhost')
+] + [
+    'http://localhost:8000',
+    'http://127.0.0.1:8000',
+]
+
 
 # Application definition
 
@@ -50,6 +59,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'PrimeFit',
 ]
 
 MIDDLEWARE = [
