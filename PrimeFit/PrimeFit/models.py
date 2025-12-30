@@ -111,11 +111,26 @@ class InstructorInfo(models.Model):
     email = models.CharField(max_length=254)
     phone = models.CharField(max_length=15)
     isactive = models.BooleanField()
+    hired_at = models.DateField()
     userid = models.IntegerField()
     
     class Meta:
         managed = False
         db_table = 'vw_instructor_info'
+
+class InstructorMonthlyStats(models.Model):
+    instructorid = models.AutoField(primary_key=True)
+    userid = models.IntegerField()
+    instructor_name = models.CharField(max_length=100)
+    classes_month = models.IntegerField()
+    students_month = models.IntegerField()
+    hours_month = models.FloatField()
+    stats_year = models.IntegerField()
+    stats_month = models.IntegerField()
+
+    class Meta:
+        managed = False
+        db_table = 'vw_instructor_stats_month'
 
 # Model for vw_instructor_classes
 class InstructorClasses(models.Model):
@@ -130,6 +145,43 @@ class InstructorClasses(models.Model):
     class Meta:
         managed = False
         db_table = 'vw_instructor_classes'
+
+class InstructorDashboardStats(models.Model):
+    instructorid = models.AutoField(primary_key=True)
+    userid = models.IntegerField()
+    instructor_name = models.CharField(max_length=100)
+    classes_today = models.IntegerField()
+    students_today = models.IntegerField()
+    occupation_rate = models.IntegerField()
+    next_class_time = models.CharField(max_length=5, null=True, blank=True)
+    next_class_name = models.CharField(max_length=100, null=True, blank=True)
+    next_class_room = models.CharField(max_length=50, null=True, blank=True)
+
+    class Meta:
+        managed = False
+        db_table = 'vw_instructor_daily_dashboard'
+
+class InstructorClassesToday(models.Model):
+    classid = models.AutoField(primary_key=True)
+    class_name = models.CharField(max_length=100)
+    room = models.CharField(max_length=50)
+    capacity = models.IntegerField()
+    duration_minutes = models.IntegerField()
+    classscheduleid = models.IntegerField()
+    date = models.DateField()
+    starttime = models.TimeField()
+    endtime = models.TimeField()
+    maxparticipants = models.IntegerField()
+    start_time = models.CharField(max_length=5)
+    end_time = models.CharField(max_length=5)
+    time_slot = models.CharField(max_length=13)
+    enrolled_students = models.IntegerField()
+    instructorid = models.IntegerField()
+    userid = models.IntegerField()
+
+    class Meta:
+        managed = False
+        db_table = 'vw_instructor_classes_today'
 
 # Model for vw_class_schedules
 class ClassSchedules(models.Model):
@@ -273,3 +325,68 @@ class MemberCheckinHistory(models.Model):
     class Meta:
         managed = False
         db_table = 'vw_member_checkin_history'
+
+# Model for vw_instructor_next_class_members
+class InstructorNextClassMembers(models.Model):
+    class_name = models.CharField(max_length=100)
+    class_time = models.CharField(max_length=5)
+    room = models.CharField(max_length=50)
+    date = models.DateField()
+    classscheduleid = models.IntegerField()
+    instructorid = models.IntegerField()
+    instructor_userid = models.IntegerField()
+    member_name = models.CharField(max_length=100)
+    memberid = models.IntegerField(primary_key=True)
+    plan_name = models.CharField(max_length=100, null=True, blank=True)
+    total_enrolled = models.IntegerField()
+    
+    class Meta:
+        managed = False
+        db_table = 'vw_instructor_next_class_members'
+
+# Model for vw_instructor_class_history
+class InstructorClassHistory(models.Model):
+    date = models.DateField()
+    schedule = models.CharField(max_length=11)  # Format: HH:MM-HH:MM
+    class_name = models.CharField(max_length=100)
+    room = models.CharField(max_length=50)
+    enrolled = models.IntegerField()
+    present = models.IntegerField()
+    rate = models.DecimalField(max_digits=5, decimal_places=2)
+    instructorid = models.IntegerField()
+    instructor_userid = models.IntegerField()
+    
+    class Meta:
+        managed = False
+        db_table = 'vw_instructor_class_history'
+
+
+# Model for vw_instructor_week_performance
+class InstructorWeekPerformance(models.Model):
+    instructorid = models.IntegerField(primary_key=True)
+    instructor_userid = models.IntegerField()
+    instructor_name = models.CharField(max_length=100)
+    total_classes = models.IntegerField()
+    total_students = models.IntegerField()
+    total_capacity = models.IntegerField()
+    average_attendance = models.DecimalField(max_digits=5, decimal_places=2)
+    
+    class Meta:
+        managed = False
+        db_table = 'vw_instructor_week_performance'
+
+# Model for vw_instructor_popular_classes
+class InstructorPopularClasses(models.Model):
+    instructorid = models.IntegerField()
+    instructor_userid = models.IntegerField()
+    class_name = models.CharField(max_length=100, primary_key=True)
+    room = models.CharField(max_length=50)
+    total_sessions = models.IntegerField()
+    total_capacity = models.IntegerField()
+    total_attendees = models.IntegerField()
+    occupation_rate = models.DecimalField(max_digits=5, decimal_places=2)
+    popularity_rank = models.IntegerField()
+    
+    class Meta:
+        managed = False
+        db_table = 'vw_instructor_popular_classes'
