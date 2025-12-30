@@ -1,15 +1,15 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.db import connection
+from django.utils import timezone
 from django.contrib.auth.hashers import make_password, check_password
 from .models import (
     UserAuthentication, Plan, EmailExists, MemberStatsMonth, 
-    MemberScheduleClasses, MemberAvailableClasses, MemberAccountDetails,
+    MemberScheduleClasses, MemberAccountDetails,
     InstructorInfo, InstructorClasses, ClassSchedules, DashboardStats,
     AllMembers, AllClasses, AllCheckins, Machines, Payments, Plans,
-    MemberPaymentHistory, MemberCheckinHistory
+    MemberPaymentHistory, MemberCheckinHistory, InstructorMonthlyStats, InstructorDashboardStats, InstructorClassesToday, InstructorNextClassMembers, InstructorClassHistory, InstructorWeekPerformance, InstructorPopularClasses
 )
-
 
 # Autenticação usando tabela USERS do PostgreSQL
 def login_view(request):
@@ -263,16 +263,48 @@ def instructor_account(request):
         classes = InstructorClasses.objects.filter(userid=user_data['userid']).values(
             'classid', 'name', 'room', 'capacity', 'duration_minutes'
         )
-    
+        # Garantir que sempre retorna uma lista, mesmo vazia
+        classes = list(classes) if classes else []
+
+        # Buscar horário semanal do instrutor
+        weekly_schedule = InstructorClasses.objects.filter(
+            userid=user_data['userid']
+        ).exclude(
+            classscheduleid__isnull=True
+        ).values(
+            'name', 'room', 'start_time', 'end_time',
+            'day_of_week', 'current_participants', 'max_participants'
+        ).order_by('starttime', 'day_of_week')
+        
+        # Organizar horário por slots de tempo e dias da semana
+        schedule_grid = {}
+        for schedule in weekly_schedule:
+            time_slot = f"{schedule['start_time']}-{schedule['end_time']}"
+            if time_slot not in schedule_grid:
+                schedule_grid[time_slot] = {}
+            
+            # day_of_week: 0=Domingo, 1=Segunda, 2=Terça, 3=Quarta, 4=Quinta, 5=Sexta, 6=Sábado
+            day_index = schedule['day_of_week']
+            schedule_grid[time_slot][day_index] = {
+                'name': schedule['name'],
+                'room': schedule['room'],
+                'current': schedule['current_participants'],
+                'max': schedule['max_participants']
+            }
+
+        # Buscar estatísticas mensais do instrutor
+        monthly_info = InstructorMonthlyStats.objects.filter(userid=user_data['userid']).first()
+
     except Exception as e:
-        instructor_info = None
-        classes = []
+    
         messages.error(request, f'Erro ao carregar dados: {str(e)}')
     
     context = {
         'user_data': user_data,
         'instructor_info': instructor_info,
-        'classes': list(classes)
+        'classes': classes, 
+        'monthly_info': monthly_info,
+        'schedule_grid': schedule_grid
     }
     return render(request, 'Instructor/Account.html', context)
 
@@ -280,6 +312,9 @@ def instructor_account(request):
 def instructor_class_management(request):
     user_data = get_user_data(request)
     
+    # Inicializar variáveis com valores padrão
+    today_date = timezone.now().date()
+     
     try:
         # Buscar horários das aulas do instrutor usando model
         class_schedules = ClassSchedules.objects.filter(
@@ -287,14 +322,56 @@ def instructor_class_management(request):
         ).order_by('date', 'starttime').values(
             'classscheduleid', 'name', 'date', 'starttime', 'endtime', 'maxparticipants', 'room'
         )
-    
+
+        # Garantir que sempre retorna uma lista, mesmo vazia
+        class_schedules = list(class_schedules) if class_schedules else []
+
+        dashboard_stats = InstructorDashboardStats.objects.filter(userid=user_data['userid']).first()
+
+        # Garantir que sempre retorna um dicionário, mesmo vazio
+        dashboard_stats = dashboard_stats if dashboard_stats else {}
+
+        class_today = InstructorClassesToday.objects.filter(userid=user_data['userid']).order_by('starttime')
+
+        # Garantir que sempre retorna uma lista, mesmo vazia
+        class_today = list(class_today) if class_today else []
+
+        # Buscar membros da próxima aula
+        next_class_members = InstructorNextClassMembers.objects.filter(instructor_userid=user_data['userid']).order_by('member_name')
+
+        # Garantir que sempre retorna uma lista, mesmo vazia
+        next_class_members = list(next_class_members) if next_class_members else []
+
+        # Buscar histórico de aulas da última semana
+        class_history = InstructorClassHistory.objects.filter(instructor_userid=user_data['userid']).values(
+            'date', 'schedule', 'class_name', 'room', 'enrolled', 'present', 'rate', 'instructorid', 'instructor_userid'
+        ).order_by('date', 'schedule')
+
+        # Garantir que sempre retorna uma lista, mesmo vazia
+        class_history = list(class_history) if class_history else []
+
+        # Buscar performance semanal do instrutor
+        weekly_performance = InstructorWeekPerformance.objects.filter(instructor_userid=user_data['userid']).first()
+
+        # Buscar aulas populares do instrutor (ordenar por ranking crescente: 1º, 2º, 3º...)
+        popular_classes = InstructorPopularClasses.objects.filter(instructor_userid=user_data['userid']).order_by('popularity_rank')
+
+        # Garantir que sempre retorna uma lista, mesmo vazia
+        popular_classes = list(popular_classes) if popular_classes else []
+
     except Exception as e:
-        class_schedules = []
         messages.error(request, f'Erro ao carregar horários: {str(e)}')
     
     context = {
+        'today_date': today_date,
         'user_data': user_data,
-        'class_schedules': list(class_schedules)
+        'class_schedules': class_schedules,
+        'dashboard_stats': dashboard_stats,
+        'class_today': class_today,
+        'next_class_members': next_class_members,
+        'class_history': class_history,
+        'weekly_performance': weekly_performance,
+        'popular_classes': popular_classes
     }
     return render(request, 'Instructor/ClassManagement.html', context)
 
