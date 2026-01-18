@@ -1,0 +1,182 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Editar Plano{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Editar Plano</h1>
+    <a href="{% url 'manager_plans' %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left me-2"></i>Voltar aos Planos
+    </a>
+</div>
+
+<!-- Exibir mensagens -->
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endfor %}
+{% endif %}
+
+<div class="row">
+    <div class="col-md-8">
+        <!-- Formulário de Edição -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-edit me-2"></i>Dados do Plano
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Nome do Plano <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="name" name="name" 
+                                       value="{{ plan.name }}" required maxlength="80">
+                                <div class="form-text">Máximo 80 caracteres</div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="monthlyprice" class="form-label">Preço Mensal (€) <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" id="monthlyprice" name="monthlyprice" 
+                                       value="{{ plan.monthlyprice }}" step="0.01" min="0" required>
+                                <div class="form-text">Valor em euros (ex: 25.50)</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Descrição</label>
+                        <textarea class="form-control" id="description" name="description" 
+                                  rows="4" maxlength="500">{{ plan.description }}</textarea>
+                        <div class="form-text">Máximo 500 caracteres. Descreva os benefícios e características do plano.</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="access24h" name="access24h" 
+                                   {% if plan.access24h %}checked{% endif %}>
+                            <label class="form-check-label" for="access24h">
+                                Acesso 24 horas
+                            </label>
+                        </div>
+                        <div class="form-text">Marque se este plano permite acesso ao ginásio 24 horas por dia</div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <button type="button" class="btn btn-outline-secondary" onclick="history.back()">
+                            <i class="fas fa-times me-2"></i>Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Guardar Alterações
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <!-- Informações do Plano -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-info-circle me-2"></i>Informações do Plano
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <strong>ID do Plano:</strong> {{ plan.planid }}
+                </div>
+                <div class="mb-3">
+                    <strong>Membros Ativos:</strong> 
+                    <span class="badge bg-success">{{ plan_stats.member_count }}</span>
+                </div>
+                <div class="mb-3">
+                    <strong>Percentagem de Membros:</strong> 
+                    <span class="badge bg-info">{{ plan_stats.percentage }}%</span>
+                </div>
+                <div class="mb-3">
+                    <strong>Estado:</strong> 
+                    <span class="badge bg-success">Ativo</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Pré-visualização -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-eye me-2"></i>Pré-visualização
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="text-center p-3 border rounded">
+                    <h5 id="preview-name">{{ plan.name }}</h5>
+                    <h3 id="preview-price">€{{ plan.monthlyprice }}<small>/mês</small></h3>
+                    <p id="preview-description" class="text-muted">{{ plan.description|default:"Sem descrição" }}</p>
+                    <div id="preview-access">
+                        {% if plan.access24h %}
+                            <span class="badge bg-success">Acesso 24h</span>
+                        {% else %}
+                            <span class="badge bg-secondary">Horário Limitado</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Pré-visualização em tempo real
+document.getElementById('name').addEventListener('input', function() {
+    document.getElementById('preview-name').textContent = this.value || 'Nome do Plano';
+});
+
+document.getElementById('monthlyprice').addEventListener('input', function() {
+    let price = this.value || '0';
+    document.getElementById('preview-price').innerHTML = `€${price}<small>/mês</small>`;
+});
+
+document.getElementById('description').addEventListener('input', function() {
+    document.getElementById('preview-description').textContent = this.value || 'Sem descrição';
+});
+
+document.getElementById('access24h').addEventListener('change', function() {
+    let accessBadge = document.getElementById('preview-access');
+    if (this.checked) {
+        accessBadge.innerHTML = '<span class="badge bg-success">Acesso 24h</span>';
+    } else {
+        accessBadge.innerHTML = '<span class="badge bg-secondary">Horário Limitado</span>';
+    }
+});
+
+// Validação do formulário
+document.querySelector('form').addEventListener('submit', function(e) {
+    let name = document.getElementById('name').value.trim();
+    let price = document.getElementById('monthlyprice').value;
+    
+    if (!name) {
+        e.preventDefault();
+        alert('Por favor, insira um nome para o plano.');
+        return;
+    }
+    
+    if (!price || price <= 0) {
+        e.preventDefault();
+        alert('Por favor, insira um preço válido para o plano.');
+        return;
+    }
+});
+</script>
+
+{% endblock %}

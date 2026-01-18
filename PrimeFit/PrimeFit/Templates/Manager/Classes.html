@@ -5,37 +5,56 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1>Gerenciamento de Aulas</h1>
-    <button class="btn btn-primary">+ Nova Aula</button>
+    <a href="{% url 'manager_class_new' %}" class="btn btn-primary">+ Nova Aula</a>
 </div>
 
 <!-- Filtros -->
+<form method="GET" id="filterForm">
 <div class="row mb-4">
     <div class="col-md-3">
-        <select class="form-select">
-            <option>Todos os Instrutores</option>
-            <option>Ana Ferreira</option>
-            <option>Carlos Mendes</option>
-            <option>Sofia Reis</option>
-            <option>Miguel Torres</option>
+        <select name="instructor" class="form-select" onchange="document.getElementById('filterForm').submit();">
+            <option value="">Todos os Instrutores</option>
+            {% for instructor in instructors %}
+                <option value="{{ instructor.filter_id }}" 
+                    {% if selected_instructor == instructor.filter_id|stringformat:"s" %}selected{% endif %}>
+                    {{ instructor.display_text }}
+                </option>
+            {% endfor %}
         </select>
     </div>
     <div class="col-md-3">
-        <select class="form-select">
-            <option>Todas as Salas</option>
-            <option>Sala A</option>
-            <option>Sala B</option>
-            <option>Sala C</option>
+        <select name="room" class="form-select" onchange="document.getElementById('filterForm').submit();">
+            <option value="">Todas as Salas</option>
+            {% for room in rooms %}
+                <option value="{{ room.filter_name }}" 
+                    {% if selected_room == room.filter_name %}selected{% endif %}>
+                    {{ room.display_text }}
+                </option>
+            {% endfor %}
         </select>
     </div>
     <div class="col-md-3">
-        <input type="date" class="form-control" value="2024-10-30">
+        <input type="date" name="date" class="form-control" 
+               value="{{ selected_date_str }}" 
+               onchange="document.getElementById('filterForm').submit();">
+    </div>
+    <div class="col-md-3">
+        <small class="text-muted">Data selecionada: {{ selected_date|date:"d/m/Y" }}</small>
     </div>
 </div>
+</form>
 
 <!-- Horário de Aulas -->
 <div class="card">
-    <div class="card-header">
-        <h5>Horário de Aulas - Hoje (30/10/2024)</h5>
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5>Horário de Aulas - {{ selected_date|date:"d/m/Y" }}</h5>
+        <div class="d-flex gap-2">
+            <small class="badge bg-light text-dark">0% Vazio</small>
+            <small class="badge bg-success">1-49% Baixa</small>
+            <small class="badge bg-info">50-79% Média</small>
+            <small class="badge bg-warning text-dark">80-99% Alta</small>
+            <small class="badge bg-danger">100% Lotado</small>
+        </div>
     </div>
     <div class="card-body">
         <div class="table-responsive">
@@ -43,84 +62,49 @@
                 <thead class="table-dark">
                     <tr>
                         <th>Hora</th>
-                        <th>Sala A</th>
-                        <th>Sala B</th>
-                        <th>Sala C</th>
+                        {% for room in rooms %}
+                            <th>{{ room.display_text }}</th>
+                        {% endfor %}
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td><strong>08:00</strong></td>
-                        <td>
-                            <div class="border rounded p-2 bg-warning">
-                                <strong>Yoga Matinal</strong><br>
-                                <small>Instrutor: Ana Ferreira (ID: 15)</small><br>
-                                <small>Inscritos: 8/15</small>
-                            </div>
-                        </td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td><strong>09:00</strong></td>
-                        <td></td>
-                        <td>
-                            <div class="border rounded p-2 bg-success">
-                                <strong>CrossFit Intenso</strong><br>
-                                <small>Instrutor: Carlos Mendes (ID: 22)</small><br>
-                                <small>Inscritos: 12/12 (Lotado)</small>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="border rounded p-2 bg-info">
-                                <strong>Spinning</strong><br>
-                                <small>Instrutor: Miguel Torres (ID: 31)</small><br>
-                                <small>Inscritos: 6/20</small>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><strong>10:00</strong></td>
-                        <td>
-                            <div class="border rounded p-2 bg-primary">
-                                <strong>Pilates</strong><br>
-                                <small>Instrutor: Sofia Reis (ID: 18)</small><br>
-                                <small>Inscritos: 5/10</small>
-                            </div>
-                        </td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td><strong>17:00</strong></td>
-                        <td></td>
-                        <td>
-                            <div class="border rounded p-2 bg-warning">
-                                <strong>Zumba</strong><br>
-                                <small>Instrutor: Ana Ferreira (ID: 15)</small><br>
-                                <small>Inscritos: 15/25</small>
-                            </div>
-                        </td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td><strong>18:00</strong></td>
-                        <td>
-                            <div class="border rounded p-2 bg-success">
-                                <strong>Musculação</strong><br>
-                                <small>Instrutor: Carlos Mendes (ID: 22)</small><br>
-                                <small>Inscritos: 8/10</small>
-                            </div>
-                        </td>
-                        <td></td>
-                        <td>
-                            <div class="border rounded p-2 bg-info">
-                                <strong>Aqua Fitness</strong><br>
-                                <small>Instrutor: Sofia Reis (ID: 18)</small><br>
-                                <small>Inscritos: 12/15</small>
-                            </div>
-                        </td>
-                    </tr>
+                    {% if classes %}
+                        <!-- Agrupar aulas por horário -->
+                        {% regroup classes by start_time as time_groups %}
+                        {% for time_group in time_groups %}
+                        <tr>
+                            <td><strong>{{ time_group.grouper }}</strong></td>
+                            {% for room in rooms %}
+                                <td>
+                                    {% for class in time_group.list %}
+                                        {% if class.room == room.filter_name %}
+                                            <div class="border rounded p-2 
+                                                {% if class.occupation_percentage >= 100 %}bg-danger text-white
+                                                {% elif class.occupation_percentage >= 80 %}bg-warning
+                                                {% elif class.occupation_percentage >= 50 %}bg-info text-white
+                                                {% elif class.occupation_percentage > 0 %}bg-success text-white
+                                                {% else %}bg-light
+                                                {% endif %}">
+                                                <strong>{{ class.class_name }}</strong><br>
+                                                <small>Instrutor: {{ class.instructor_name }}</small><br>
+                                                <small>Inscritos: {{ class.enrolled_count }}/{{ class.max_capacity }}</small>
+                                                {% if class.occupation_percentage >= 100 %}
+                                                    <br><small class="fw-bold">(Lotado)</small>
+                                                {% endif %}
+                                            </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                </td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="{{ rooms|length|add:1 }}" class="text-center text-muted">
+                                Nenhuma aula agendada para esta data.
+                            </td>
+                        </tr>
+                    {% endif %}
                 </tbody>
             </table>
         </div>
@@ -143,67 +127,65 @@
                     <th>Horário</th>
                     <th>Capacidade</th>
                     <th>Inscritos</th>
+                    <th>Ocupação</th>
                     <th>Status</th>
                     <th>Ações</th>
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>101</td>
-                    <td>Yoga Matinal</td>
-                    <td>Ana Ferreira</td>
-                    <td>Sala A</td>
-                    <td>08:00 - 09:00</td>
-                    <td>15</td>
-                    <td>8</td>
-                    <td><span class="badge bg-success">Ativa</span></td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-primary">Ver</button>
-                        <button class="btn btn-sm btn-outline-warning">Editar</button>
-                    </td>
-                </tr>
-                <tr>
-                    <td>102</td>
-                    <td>CrossFit Intenso</td>
-                    <td>Carlos Mendes</td>
-                    <td>Sala B</td>
-                    <td>09:00 - 10:00</td>
-                    <td>12</td>
-                    <td>12</td>
-                    <td><span class="badge bg-warning">Lotada</span></td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-primary">Ver</button>
-                        <button class="btn btn-sm btn-outline-warning">Editar</button>
-                    </td>
-                </tr>
-                <tr>
-                    <td>103</td>
-                    <td>Spinning</td>
-                    <td>Miguel Torres</td>
-                    <td>Sala C</td>
-                    <td>09:00 - 10:00</td>
-                    <td>20</td>
-                    <td>6</td>
-                    <td><span class="badge bg-success">Ativa</span></td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-primary">Ver</button>
-                        <button class="btn btn-sm btn-outline-warning">Editar</button>
-                    </td>
-                </tr>
-                <tr>
-                    <td>104</td>
-                    <td>Pilates</td>
-                    <td>Sofia Reis</td>
-                    <td>Sala A</td>
-                    <td>10:00 - 11:00</td>
-                    <td>10</td>
-                    <td>5</td>
-                    <td><span class="badge bg-success">Ativa</span></td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-primary">Ver</button>
-                        <button class="btn btn-sm btn-outline-warning">Editar</button>
-                    </td>
-                </tr>
+                {% if classes %}
+                    {% for class in classes %}
+                    <tr>
+                        <td>{{ class.classscheduleid }}</td>
+                        <td>{{ class.class_name }}</td>
+                        <td>{{ class.instructor_name }}</td>
+                        <td>{{ class.room }}</td>
+                        <td>{{ class.start_time }} - {{ class.end_time }}</td>
+                        <td>{{ class.max_capacity }}</td>
+                        <td>{{ class.enrolled_count }}</td>
+                        <td>
+                            {% if class.occupation_percentage > 0 %}
+                                <div class="progress" style="height: 20px;">
+                                    <div class="progress-bar 
+                                        {% if class.occupation_percentage >= 100 %}bg-danger
+                                        {% elif class.occupation_percentage >= 80 %}bg-warning
+                                        {% elif class.occupation_percentage >= 50 %}bg-info
+                                        {% else %}bg-success
+                                        {% endif %}" 
+                                        role="progressbar" 
+                                        style="width: {{ class.occupation_percentage }}%" 
+                                        aria-valuenow="{{ class.occupation_percentage }}" 
+                                        aria-valuemin="0" 
+                                        aria-valuemax="100">
+                                        <small class="text-white fw-bold">{{ class.occupation_percentage }}%</small>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <span class="badge bg-light text-dark">0%</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if class.class_status == 'Lotado' %}
+                                <span class="badge bg-danger">Lotada</span>
+                            {% elif class.class_status == 'Vazio' %}
+                                <span class="badge bg-secondary">Vazia</span>
+                            {% else %}
+                                <span class="badge bg-success">Disponível</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'manager_class_view' class.classscheduleid %}" class="btn btn-sm btn-outline-primary">Ver</a>
+                            <a href="{% url 'manager_class_edit' class.classscheduleid %}" class="btn btn-sm btn-outline-warning">Editar</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="10" class="text-center text-muted">
+                            Nenhuma aula encontrada para a data selecionada.
+                        </td>
+                    </tr>
+                {% endif %}
             </tbody>
         </table>
     </div>

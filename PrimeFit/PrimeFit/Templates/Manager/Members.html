@@ -2,42 +2,115 @@
 
 {% block title %}Membros{% endblock %}
 
+{% block extra_css %}
+<style>
+/* CSS inline para garantir carregamento dos badges */
+.badge-tag {
+    display: inline-block;
+    padding: 6px 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 4px;
+    text-align: center;
+    min-width: 70px;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: none;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.badge-basic, .badge-basico, .badge-básico {
+    background-color: #007bff !important;
+}
+
+.badge-premium {
+    background-color: #ffc107 !important;
+    color: #000 !important;
+}
+
+.badge-vip {
+    background-color: #dc3545 !important;
+}
+
+.badge-estudante {
+    background-color: #28a745 !important;
+}
+
+.badge-ativo {
+    background-color: #28a745 !important;
+}
+
+.badge-inativo {
+    background-color: #dc3545 !important;
+}
+
+.badge-suspenso {
+    background-color: #fd7e14 !important;
+}
+
+.badge-pendente {
+    background-color: #ffc107 !important;
+    color: #000 !important;
+}
+
+.badge-expirado {
+    background-color: #6c757d !important;
+}
+
+.badge-na {
+    background-color: #e9ecef !important;
+    color: #6c757d !important;
+    border: 1px solid #dee2e6 !important;
+    font-style: italic;
+}
+</style>
+{% endblock %}
+
 {% block content %}
+
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1>Gerenciamento de Membros</h1>
-    <button class="btn btn-primary">+ Novo Membro</button>
+    <a href="{% url 'manager_member_new' %}" class="btn btn-primary">
+        <i class="fas fa-plus me-2"></i>Novo Membro
+    </a>
 </div>
 
 <!-- Filtros e Pesquisa -->
-<div class="row mb-4">
+<form method="get" class="row mb-4" id="filterForm">
     <div class="col-md-4">
-        <input type="text" class="form-control" placeholder="Pesquisar por nome ou email...">
+        <input type="text" name="search" class="form-control" 
+               placeholder="Pesquisar por nome ou email..."
+               value="{{ search_query }}"
+               onchange="document.getElementById('filterForm').submit()">
     </div>
     <div class="col-md-2">
-        <select class="form-select">
-            <option>Todos os Status</option>
-            <option>Ativo</option>
-            <option>Inativo</option>
-            <option>Suspenso</option>
+        <select name="status" class="form-select" onchange="document.getElementById('filterForm').submit()">
+            <option value="todos" {% if status_filter == 'todos' or not status_filter %}selected{% endif %}>Todos os Status</option>
+            
+            <option value="ativo" {% if status_filter == 'ativo' %}selected{% endif %}>Ativo</option>
+            <option value="inativo" {% if status_filter == 'inativo' %}selected{% endif %}>Inativo</option>
+            <option value="suspenso" {% if status_filter == 'suspenso' %}selected{% endif %}>Suspenso</option>
         </select>
     </div>
     <div class="col-md-2">
-        <select class="form-select">
-            <option>Todos os Planos</option>
-            <option>Basic</option>
-            <option>Premium</option>
-            <option>VIP</option>
+        <select name="plan" class="form-select" onchange="document.getElementById('filterForm').submit()">
+            <option value="todos" {% if plan_filter == 'todos' or not plan_filter %}selected{% endif %}>Todos os Planos</option>
+            {% for plan in plans %}
+                <option value="{{ plan.name }}" {% if plan_filter == plan.name %}selected{% endif %}>{{ plan.name }}</option>
+            {% endfor %}
         </select>
     </div>
-</div>
+</form>
 
 <!-- Tabela de Membros -->
 <div class="card">
     <div class="card-header">
-        <h5>Lista de Membros (324 total)</h5>
+        <h5>Lista de Membros ({{ total_members }} total)</h5>
     </div>
     <div class="card-body">
-        <table class="table table-striped table-hover">
+        {% if members %}
+        <table class="table table-striped table-hover members-table">
             <thead>
                 <tr>
                     <th>ID</th>
@@ -51,110 +124,149 @@
                 </tr>
             </thead>
             <tbody>
+                {% for member in members %}
                 <tr>
-                    <td>205</td>
-                    <td>Maria Silva</td>
-                    <td>maria.silva@email.com</td>
-                    <td>912 345 678</td>
-                    <td><span class="badge bg-warning">Premium</span></td>
-                    <td><span class="badge bg-success">Ativo</span></td>
-                    <td>15/03/2024</td>
+                    <td><strong>#{{ member.memberid }}</strong></td>
+                    <td>{{ member.member_name }}</td>
+                    <td>{{ member.email }}</td>
+                    <td>{{ member.member_phone }}</td>
                     <td>
-                        <button class="btn btn-sm btn-outline-primary">Ver</button>
-                        <button class="btn btn-sm btn-outline-warning">Editar</button>
+                        {% if member.plan_name %}
+                            <span class="badge badge-tag badge-{{ member.plan_name|lower|cut:' ' }}">
+                                {{ member.plan_name }}
+                            </span>
+                        {% else %}
+                            <span class="badge badge-tag badge-na">N/A</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if member.status %}
+                            <span class="badge badge-tag badge-{{ member.status|lower|cut:' ' }}">
+                                {{ member.status|title }}
+                            </span>
+                        {% else %}
+                            <span class="badge badge-tag badge-na">N/A</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <small class="text-muted">
+                            {{ member.member_registration_date|date:"d/m/Y" }}
+                        </small>
+                    </td>
+                    <td>
+                        <a href="{% url 'manager_member_detail' member.memberid %}" 
+                           class="btn btn-sm btn-outline-primary action-btn" title="Ver detalhes">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        <a href="{% url 'manager_member_detail' member.memberid %}?edit=true" 
+                           class="btn btn-sm btn-outline-warning action-btn" title="Editar">
+                            <i class="fas fa-edit"></i>
+                        </a>
                     </td>
                 </tr>
+                {% empty %}
                 <tr>
-                    <td>187</td>
-                    <td>João Santos</td>
-                    <td>joao.santos@email.com</td>
-                    <td>913 456 789</td>
-                    <td><span class="badge bg-primary">Basic</span></td>
-                    <td><span class="badge bg-success">Ativo</span></td>
-                    <td>22/02/2024</td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-primary">Ver</button>
-                        <button class="btn btn-sm btn-outline-warning">Editar</button>
+                    <td colspan="8" class="text-center py-4">
+                        <i class="fas fa-users text-muted mb-2" style="font-size: 2rem;"></i>
+                        <p class="text-muted">Nenhum membro encontrado.</p>
                     </td>
                 </tr>
-                <tr>
-                    <td>156</td>
-                    <td>Ana Costa</td>
-                    <td>ana.costa@email.com</td>
-                    <td>914 567 890</td>
-                    <td><span class="badge bg-info">VIP</span></td>
-                    <td><span class="badge bg-success">Ativo</span></td>
-                    <td>08/01/2024</td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-primary">Ver</button>
-                        <button class="btn btn-sm btn-outline-warning">Editar</button>
-                    </td>
-                </tr>
-                <tr>
-                    <td>298</td>
-                    <td>Pedro Lima</td>
-                    <td>pedro.lima@email.com</td>
-                    <td>915 678 901</td>
-                    <td><span class="badge bg-warning">Premium</span></td>
-                    <td><span class="badge bg-success">Ativo</span></td>
-                    <td>10/04/2024</td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-primary">Ver</button>
-                        <button class="btn btn-sm btn-outline-warning">Editar</button>
-                    </td>
-                </tr>
-                <tr>
-                    <td>142</td>
-                    <td>Carla Pereira</td>
-                    <td>carla.pereira@email.com</td>
-                    <td>916 789 012</td>
-                    <td><span class="badge bg-primary">Basic</span></td>
-                    <td><span class="badge bg-danger">Suspenso</span></td>
-                    <td>28/12/2023</td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-primary">Ver</button>
-                        <button class="btn btn-sm btn-outline-warning">Editar</button>
-                    </td>
-                </tr>
-                <tr>
-                    <td>267</td>
-                    <td>Rui Oliveira</td>
-                    <td>rui.oliveira@email.com</td>
-                    <td>917 890 123</td>
-                    <td><span class="badge bg-info">VIP</span></td>
-                    <td><span class="badge bg-success">Ativo</span></td>
-                    <td>05/05/2024</td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-primary">Ver</button>
-                        <button class="btn btn-sm btn-outline-warning">Editar</button>
-                    </td>
-                </tr>
-                <tr>
-                    <td>189</td>
-                    <td>Sofia Martins</td>
-                    <td>sofia.martins@email.com</td>
-                    <td>918 901 234</td>
-                    <td><span class="badge bg-warning">Premium</span></td>
-                    <td><span class="badge bg-secondary">Inativo</span></td>
-                    <td>18/11/2023</td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-primary">Ver</button>
-                        <button class="btn btn-sm btn-outline-warning">Editar</button>
-                    </td>
-                </tr>
+                {% endfor %}
             </tbody>
         </table>
+        {% else %}
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i> Nenhum membro encontrado com os filtros aplicados.
+        </div>
+        {% endif %}
     </div>
+    
+    <!-- Paginação Estilizada -->
+    {% if members.has_other_pages %}
     <div class="card-footer">
-        <nav>
-            <ul class="pagination justify-content-center">
-                <li class="page-item"><a class="page-link" href="#">Anterior</a></li>
-                <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                <li class="page-item"><a class="page-link" href="#">2</a></li>
-                <li class="page-item"><a class="page-link" href="#">3</a></li>
-                <li class="page-item"><a class="page-link" href="#">Próximo</a></li>
-            </ul>
-        </nav>
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center">
+            <!-- Informações da página atual -->
+            <div class="pagination-info mb-2 mb-md-0">
+                <i class="fas fa-info-circle me-1"></i>
+                Página {{ members.number }} de {{ members.paginator.num_pages }} 
+                ({{ members.paginator.count }} membros)
+            </div>
+            
+            <!-- Paginação com números -->
+            <div class="primefit-pagination">
+                <nav aria-label="Paginação de membros">
+                    <ul class="pagination mb-0">
+                        
+                        <!-- Primeiro << -->
+                        {% if members.number > 1 %}
+                            <li class="page-item">
+                                <a class="page-link page-nav" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page=1" title="Primeira página">
+                                    &laquo;&laquo;
+                                </a>
+                            </li>
+                        {% endif %}
+                        
+                        <!-- Números das páginas -->
+                        {% for num in members.paginator.page_range %}
+                            {% if num == members.number %}
+                                <!-- Página atual (ativa) -->
+                                <li class="page-item active">
+                                    <span class="page-link">{{ num }}</span>
+                                </li>
+                            {% elif num == 1 or num == members.paginator.num_pages %}
+                                <!-- Primeira e última página sempre visíveis -->
+                                <li class="page-item">
+                                    <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ num }}">{{ num }}</a>
+                                </li>
+                            {% elif num >= members.number|add:"-2" and num <= members.number|add:"2" %}
+                                <!-- Páginas próximas à atual (±2) -->
+                                <li class="page-item">
+                                    <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ num }}">{{ num }}</a>
+                                </li>
+                            {% elif num == 2 and members.number > 4 %}
+                                <!-- Reticências após a primeira página -->
+                                <li class="page-item">
+                                    <span class="page-ellipsis">...</span>
+                                </li>
+                            {% elif num == members.paginator.num_pages|add:"-1" and members.number < members.paginator.num_pages|add:"-3" %}
+                                <!-- Reticências antes da última página -->
+                                <li class="page-item">
+                                    <span class="page-ellipsis">...</span>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        <!-- Último >> -->
+                        {% if members.number < members.paginator.num_pages %}
+                            <li class="page-item">
+                                <a class="page-link page-nav" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ members.paginator.num_pages }}" title="Última página">
+                                    &raquo;&raquo;
+                                </a>
+                            </li>
+                        {% endif %}
+                        
+                    </ul>
+                </nav>
+            </div>
+        </div>
     </div>
+    {% endif %}
 </div>
+
+<script>
+    // Auto-submit do formulário quando houver mudanças nos filtros
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.querySelector('input[name="search"]');
+        let searchTimeout;
+        
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(function() {
+                    document.getElementById('filterForm').submit();
+                }, 500); // Aguarda 500ms após parar de digitar
+            });
+        }
+    }); 
+</script>
 {% endblock %}

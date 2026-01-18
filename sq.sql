@@ -381,9 +381,12 @@ INSERT INTO PLAN (NAME, MONTHLYPRICE, ACCESS24H, DESCRIPTION) VALUES
 -- GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO gym_admin;
 -- GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO gym_user, gym_admin;
 
-select u.userid, m.memberid, u.email, u.password from users u 
-join member m on u.userid = m.userid
+select u.userid, m.memberid, i.instructorid, u.email, u.password, u.usertypeid from users u 
+left join member m on u.userid = m.userid
+left join instructor i on u.userid = i.userid
+where u.usertypeid = 2
 
 
-SELECT * FROM classbooking
+SELECT * FROM classbooking;
+
 

@@ -1,0 +1,310 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Nova Aula{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Agendar Nova Aula</h1>
+    <a href="{% url 'manager_classes' %}" class="btn btn-secondary">← Voltar</a>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5>Dados da Aula</h5>
+    </div>
+    <div class="card-body">
+        <form method="POST" id="classForm">
+            {% csrf_token %}
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="class_id" class="form-label">Aula *</label>
+                        <select name="class_id" id="class_id" class="form-select" required>
+                            <option value="">Selecione uma aula</option>
+                            {% for class in existing_classes %}
+                                <option value="{{ class.classid }}" 
+                                        data-room="{{ class.room }}" 
+                                        data-duration="{{ class.duration_minutes }}">
+                                    {{ class.name }}
+                                </option>
+                            {% endfor %}
+                            <option value="new">+ Criar Nova Aula</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3" id="new_class_div" style="display: none;">
+                        <label for="new_class_name" class="form-label">Nome da Nova Aula *</label>
+                        <input type="text" name="new_class_name" id="new_class_name" class="form-control" 
+                               placeholder="Ex: Yoga Matinal">
+                    </div>
+                    
+                    <div class="mb-3" id="duration_div" style="display: none;">
+                        <label for="duration_minutes" class="form-label">Duração (minutos) *</label>
+                        <input type="number" name="duration_minutes" id="duration_minutes" class="form-control" 
+                               value="60" min="15" max="480">
+                        <div class="form-text">
+                            <i class="fas fa-info-circle"></i> 
+                            A duração é calculada automaticamente quando você define as horas de início e fim.
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="instructor_id" class="form-label">Instrutor *</label>
+                        <select name="instructor_id" id="instructor_id" class="form-select" required>
+                            <option value="">Selecione um instrutor</option>
+                            {% for instructor in instructors %}
+                                <option value="{{ instructor.filter_id }}">{{ instructor.display_text }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="room" class="form-label">Sala *</label>
+                        <select name="room" id="room" class="form-select">
+                            <option value="">Selecione uma sala</option>
+                            {% for room in rooms %}
+                                <option value="{{ room.filter_name }}">{{ room.display_text }}</option>
+                            {% endfor %}
+                            <option value="new">+ Nova Sala</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3" id="new_room_div" style="display: none;">
+                        <label for="new_room" class="form-label">Nome da Nova Sala *</label>
+                        <input type="text" name="new_room" id="new_room" class="form-control" 
+                               placeholder="Ex: Sala D">
+                    </div>
+                </div>
+            </div>
+            
+            <hr>
+            
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label for="date" class="form-label">Data *</label>
+                        <input type="date" name="date" id="date" class="form-control" required>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label for="start_time" class="form-label">Hora de Início *</label>
+                        <input type="time" name="start_time" id="start_time" class="form-control" required>
+                        <div class="form-text">A duração será calculada automaticamente</div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label for="end_time" class="form-label">Hora de Fim *</label>
+                        <input type="time" name="end_time" id="end_time" class="form-control" required>
+                        <div class="form-text" id="duration_display"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="max_participants" class="form-label">Máximo de Participantes *</label>
+                        <input type="number" name="max_participants" id="max_participants" 
+                               class="form-control" min="1" max="50" required>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="d-flex justify-content-end gap-2">
+                <a href="{% url 'manager_classes' %}" class="btn btn-secondary">Cancelar</a>
+                <button type="submit" class="btn btn-primary">Agendar Aula</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const classSelect = document.getElementById('class_id');
+    const newClassDiv = document.getElementById('new_class_div');
+    const newClassInput = document.getElementById('new_class_name');
+    const durationDiv = document.getElementById('duration_div');
+    const durationInput = document.getElementById('duration_minutes');
+    const roomSelect = document.getElementById('room');
+    const newRoomDiv = document.getElementById('new_room_div');
+    const newRoomInput = document.getElementById('new_room');
+    const startTimeInput = document.getElementById('start_time');
+    const endTimeInput = document.getElementById('end_time');
+    
+    // Lógica para mostrar/esconder campos de nova aula
+    classSelect.addEventListener('change', function() {
+        if (this.value === 'new') {
+            newClassDiv.style.display = 'block';
+            durationDiv.style.display = 'block';
+            newClassInput.required = true;
+            durationInput.required = true;
+        } else {
+            newClassDiv.style.display = 'none';
+            durationDiv.style.display = 'none';
+            newClassInput.required = false;
+            durationInput.required = false;
+            
+            // Auto-preencher sala se aula selecionada
+            if (this.value) {
+                const selectedOption = this.options[this.selectedIndex];
+                const room = selectedOption.getAttribute('data-room');
+                const duration = selectedOption.getAttribute('data-duration');
+                
+                if (room) {
+                    // Tentar selecionar a sala correspondente
+                    for (let option of roomSelect.options) {
+                        if (option.value === room) {
+                            roomSelect.value = room;
+                            break;
+                        }
+                    }
+                }
+                
+                if (duration) {
+                    durationInput.value = duration;
+                }
+            }
+        }
+    });
+    
+    // Lógica para mostrar/esconder campo de nova sala
+    roomSelect.addEventListener('change', function() {
+        if (this.value === 'new') {
+            newRoomDiv.style.display = 'block';
+            newRoomInput.required = true;
+        } else {
+            newRoomDiv.style.display = 'none';
+            newRoomInput.required = false;
+        }
+    });
+    
+    // Auto-calcular hora de fim baseada na duração
+    function updateEndTime() {
+        const startTime = startTimeInput.value;
+        const duration = parseInt(durationInput.value);
+        const durationDisplay = document.getElementById('duration_display');
+        
+        if (startTime && duration) {
+            const [hours, minutes] = startTime.split(':').map(Number);
+            const startDate = new Date();
+            startDate.setHours(hours, minutes, 0, 0);
+            
+            const endDate = new Date(startDate.getTime() + duration * 60000);
+            const endHours = endDate.getHours().toString().padStart(2, '0');
+            const endMinutes = endDate.getMinutes().toString().padStart(2, '0');
+            
+            endTimeInput.value = `${endHours}:${endMinutes}`;
+            
+            // Atualizar display de duração
+            const hours_duration = Math.floor(duration / 60);
+            const minutes_duration = duration % 60;
+            
+            let durationText = '';
+            if (hours_duration > 0) {
+                durationText += `${hours_duration}h`;
+                if (minutes_duration > 0) {
+                    durationText += ` ${minutes_duration}min`;
+                }
+            } else {
+                durationText = `${minutes_duration}min`;
+            }
+            
+            durationDisplay.innerHTML = `<i class="fas fa-clock text-primary"></i> Duração definida: ${durationText}`;
+            durationDisplay.className = 'form-text text-primary';
+        }
+    }
+    
+    // Auto-calcular duração baseada nas horas de início e fim
+    function updateDuration() {
+        const startTime = startTimeInput.value;
+        const endTime = endTimeInput.value;
+        const durationDisplay = document.getElementById('duration_display');
+        
+        if (startTime && endTime) {
+            const [startHours, startMinutes] = startTime.split(':').map(Number);
+            const [endHours, endMinutes] = endTime.split(':').map(Number);
+            
+            const startDate = new Date();
+            startDate.setHours(startHours, startMinutes, 0, 0);
+            
+            const endDate = new Date();
+            endDate.setHours(endHours, endMinutes, 0, 0);
+            
+            // Se a hora de fim for menor que a de início, assumir que é no dia seguinte
+            if (endDate < startDate) {
+                endDate.setDate(endDate.getDate() + 1);
+            }
+            
+            const diffMinutes = (endDate - startDate) / (1000 * 60);
+            
+            if (diffMinutes > 0 && diffMinutes <= 480) { // Máximo 8 horas
+                durationInput.value = diffMinutes;
+                
+                // Exibir duração de forma amigável
+                const hours = Math.floor(diffMinutes / 60);
+                const minutes = diffMinutes % 60;
+                
+                let durationText = '';
+                if (hours > 0) {
+                    durationText += `${hours}h`;
+                    if (minutes > 0) {
+                        durationText += ` ${minutes}min`;
+                    }
+                } else {
+                    durationText = `${minutes}min`;
+                }
+                
+                durationDisplay.innerHTML = `<i class="fas fa-clock text-success"></i> Duração: ${durationText}`;
+                durationDisplay.className = 'form-text text-success';
+            } else if (diffMinutes > 480) {
+                durationDisplay.innerHTML = `<i class="fas fa-exclamation-triangle text-warning"></i> Duração muito longa (${Math.floor(diffMinutes/60)}h ${diffMinutes%60}min)`;
+                durationDisplay.className = 'form-text text-warning';
+            } else {
+                durationDisplay.innerHTML = `<i class="fas fa-exclamation-triangle text-danger"></i> Hora de fim deve ser posterior à hora de início`;
+                durationDisplay.className = 'form-text text-danger';
+            }
+        } else {
+            durationDisplay.innerHTML = '';
+        }
+    }
+    
+    let isUpdatingFromDuration = false;
+    let isUpdatingFromEndTime = false;
+    
+    startTimeInput.addEventListener('change', function() {
+        if (!isUpdatingFromEndTime) {
+            isUpdatingFromDuration = true;
+            updateEndTime();
+            isUpdatingFromDuration = false;
+        }
+    });
+    
+    durationInput.addEventListener('change', function() {
+        if (!isUpdatingFromEndTime) {
+            isUpdatingFromDuration = true;
+            updateEndTime();
+            isUpdatingFromDuration = false;
+        }
+    });
+    
+    endTimeInput.addEventListener('change', function() {
+        if (!isUpdatingFromDuration) {
+            isUpdatingFromEndTime = true;
+            updateDuration();
+            isUpdatingFromEndTime = false;
+        }
+    });
+    
+    // Definir data padrão como hoje
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('date').value = today;
+});
+</script>
+{% endblock %}

@@ -1,0 +1,192 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Detalhes da Aula{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Detalhes da Aula</h1>
+    <div>
+        <a href="{% url 'manager_class_edit' class_details.classscheduleid %}" class="btn btn-warning">✏️ Editar</a>
+        <a href="{% url 'manager_classes' %}" class="btn btn-secondary">← Voltar</a>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Informações da Aula -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>Informações da Aula</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-borderless">
+                    <tr>
+                        <td><strong>ID:</strong></td>
+                        <td>{{ class_details.classscheduleid }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Nome:</strong></td>
+                        <td>{{ class_details.class_name }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Instrutor:</strong></td>
+                        <td>{{ class_details.instructor_name }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Sala:</strong></td>
+                        <td>{{ class_details.room }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Data:</strong></td>
+                        <td>{{ class_details.class_date|date:"d/m/Y" }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Horário:</strong></td>
+                        <td>{{ class_details.start_time }} - {{ class_details.end_time }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Capacidade:</strong></td>
+                        <td>{{ class_details.max_capacity }} participantes</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Inscritos:</strong></td>
+                        <td>{{ class_details.enrolled_count }} / {{ class_details.max_capacity }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Ocupação:</strong></td>
+                        <td>
+                            <div class="progress" style="height: 20px; width: 200px;">
+                                <div class="progress-bar 
+                                    {% if class_details.occupation_percentage >= 100 %}bg-danger
+                                    {% elif class_details.occupation_percentage >= 80 %}bg-warning
+                                    {% elif class_details.occupation_percentage >= 50 %}bg-info
+                                    {% else %}bg-success
+                                    {% endif %}" 
+                                    role="progressbar" 
+                                    style="width: {{ class_details.occupation_percentage }}%">
+                                    {{ class_details.occupation_percentage }}%
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Status:</strong></td>
+                        <td>
+                            {% if class_details.class_status == 'Lotado' %}
+                                <span class="badge bg-danger">Lotada</span>
+                            {% elif class_details.class_status == 'Vazio' %}
+                                <span class="badge bg-secondary">Vazia</span>
+                            {% else %}
+                                <span class="badge bg-success">Disponível</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Membros Inscritos -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5>Membros Inscritos ({{ enrolled_members|length }})</h5>
+                {% if class_details.occupation_percentage < 100 %}
+                    <small class="text-muted">Vagas disponíveis</small>
+                {% else %}
+                    <small class="text-danger">Lotada</small>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                {% if enrolled_members %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Plano</th>
+                                    <th>Inscrição</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for member in enrolled_members %}
+                                <tr>
+                                    <td>
+                                        <div>
+                                            <strong>{{ member.member_name }}</strong><br>
+                                            <small class="text-muted">{{ member.email }}</small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {% if member.plan_name %}
+                                            <span class="badge bg-primary">{{ member.plan_name }}</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Sem plano</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <small>{{ member.booking_date|date:"d/m/Y H:i" }}</small>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-users fa-2x mb-2"></i>
+                        <p>Nenhum membro inscrito ainda.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Estatísticas Rápidas -->
+<div class="row mt-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body text-center">
+                <h4>{{ class_details.enrolled_count }}</h4>
+                <p class="mb-0">Inscritos</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body text-center">
+                <h4 id="vagas-livres">0</h4>
+                <p class="mb-0">Vagas Livres</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body text-center">
+                <h4>{{ class_details.occupation_percentage }}%</h4>
+                <p class="mb-0">Ocupação</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body text-center">
+                <h4>{{ class_details.max_capacity }}</h4>
+                <p class="mb-0">Capacidade</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Calcular vagas livres
+    const maxCapacity = {{ class_details.max_capacity }};
+    const enrolled = {{ class_details.enrolled_count }};
+    const vagasLivres = maxCapacity - enrolled;
+    
+    document.getElementById('vagas-livres').textContent = vagasLivres;
+});
+</script>
+{% endblock %}

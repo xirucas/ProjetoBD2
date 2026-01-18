@@ -1,0 +1,208 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Editar Aula{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Editar Aula</h1>
+    <div>
+        <a href="{% url 'manager_class_view' class_details.classscheduleid %}" class="btn btn-info">👁️ Ver Detalhes</a>
+        <a href="{% url 'manager_classes' %}" class="btn btn-secondary">← Voltar</a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5>Editar Agendamento da Aula</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" id="editForm">
+                    {% csrf_token %}
+                    
+                    <!-- Informações da Aula (Somente Leitura) -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Nome da Aula</label>
+                            <input type="text" class="form-control" value="{{ class_details.class_name }}" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Instrutor</label>
+                            <input type="text" class="form-control" value="{{ class_details.instructor_name }}" readonly>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Sala</label>
+                            <input type="text" class="form-control" value="{{ class_details.room }}" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">ID da Aula</label>
+                            <input type="text" class="form-control" value="{{ class_details.classscheduleid }}" readonly>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <!-- Campos Editáveis -->
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="date" class="form-label">Data *</label>
+                                <input type="date" name="date" id="date" class="form-control" 
+                                       value="{{ class_details.class_date|date:'Y-m-d' }}" required>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="start_time" class="form-label">Hora de Início *</label>
+                                <input type="time" name="start_time" id="start_time" class="form-control" 
+                                       value="{{ class_details.start_time }}" required>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="end_time" class="form-label">Hora de Fim *</label>
+                                <input type="time" name="end_time" id="end_time" class="form-control" 
+                                       value="{{ class_details.end_time }}" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="max_participants" class="form-label">Máximo de Participantes *</label>
+                                <input type="number" name="max_participants" id="max_participants" 
+                                       class="form-control" min="1" max="50" 
+                                       value="{{ class_details.max_capacity }}" required>
+                                <div class="form-text">
+                                    Atualmente há {{ class_details.enrolled_count }} pessoas inscritas.
+                                    {% if class_details.enrolled_count > 0 %}
+                                        Não pode reduzir abaixo de {{ class_details.enrolled_count }}.
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{% url 'manager_classes' %}" class="btn btn-secondary">Cancelar</a>
+                        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h6>Informações Atuais</h6>
+            </div>
+            <div class="card-body">
+                <table class="table table-sm table-borderless">
+                    <tr>
+                        <td><strong>Data Atual:</strong></td>
+                        <td>{{ class_details.class_date|date:"d/m/Y" }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Horário Atual:</strong></td>
+                        <td>{{ class_details.start_time }} - {{ class_details.end_time }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Capacidade Atual:</strong></td>
+                        <td>{{ class_details.max_capacity }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Inscritos:</strong></td>
+                        <td>{{ class_details.enrolled_count }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Status:</strong></td>
+                        <td>
+                            {% if class_details.class_status == 'Lotado' %}
+                                <span class="badge bg-danger">Lotada</span>
+                            {% elif class_details.class_status == 'Vazio' %}
+                                <span class="badge bg-secondary">Vazia</span>
+                            {% else %}
+                                <span class="badge bg-success">Disponível</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h6>⚠️ Avisos Importantes</h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled mb-0">
+                    <li class="mb-2">
+                        <small class="text-warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Alterações de horário podem afetar os membros inscritos.
+                        </small>
+                    </li>
+                    <li class="mb-2">
+                        <small class="text-info">
+                            <i class="fas fa-info-circle"></i>
+                            O sistema verifica automaticamente conflitos de horário.
+                        </small>
+                    </li>
+                    {% if class_details.enrolled_count > 0 %}
+                    <li class="mb-2">
+                        <small class="text-danger">
+                            <i class="fas fa-users"></i>
+                            Não é possível reduzir a capacidade abaixo do número de inscritos.
+                        </small>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const maxParticipantsInput = document.getElementById('max_participants');
+    const currentEnrolled = {{ class_details.enrolled_count }};
+    
+    // Validar capacidade mínima
+    maxParticipantsInput.addEventListener('input', function() {
+        if (parseInt(this.value) < currentEnrolled) {
+            this.setCustomValidity(`A capacidade não pode ser menor que ${currentEnrolled} (número atual de inscritos)`);
+        } else {
+            this.setCustomValidity('');
+        }
+    });
+    
+    // Validar horários
+    const startTimeInput = document.getElementById('start_time');
+    const endTimeInput = document.getElementById('end_time');
+    
+    function validateTimes() {
+        const startTime = startTimeInput.value;
+        const endTime = endTimeInput.value;
+        
+        if (startTime && endTime) {
+            if (startTime >= endTime) {
+                endTimeInput.setCustomValidity('A hora de fim deve ser posterior à hora de início');
+            } else {
+                endTimeInput.setCustomValidity('');
+            }
+        }
+    }
+    
+    startTimeInput.addEventListener('change', validateTimes);
+    endTimeInput.addEventListener('change', validateTimes);
+});
+</script>
+{% endblock %}
