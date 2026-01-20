@@ -582,10 +582,6 @@ body {
     background-color: #dc3545;
 }
 
-.badge-suspenso {
-    background-color: #fd7e14;
-}
-
 .badge-pendente {
     background-color: #ffc107;
     color: #000;
@@ -649,6 +645,292 @@ body {
 .action-btn:hover {
     transform: translateY(-1px);
 }
+
+/* ==========================================
+   FORMULÁRIOS DE DETALHE/EDIÇÃO/CRIAÇÃO 
+   ========================================== */
+
+/* Container principal para formulários de detalhe */
+.detail-form-container {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+/* Formulários unificados para instrutor, membro e máquina */
+.instructor-form,
+.member-form,
+.machine-form {
+    max-width: 800px;
+}
+
+/* Seções do formulário */
+.form-section {
+    background: var(--white-color);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease;
+}
+
+.form-section:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.form-section h5 {
+    color: #495057;
+    border-bottom: 2px solid #e9ecef;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.form-section h5 i {
+    color: var(--primary-color);
+}
+
+/* Campos em modo visualização */
+.view-mode-field {
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    padding: 0.75rem;
+    border-radius: 0.375rem;
+    color: #495057;
+    font-weight: 500;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+}
+
+/* Botões de ação sticky */
+.action-buttons {
+    position: sticky;
+    top: 20px;
+    background: var(--white-color);
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+}
+
+/* Formulários flutuantes (floating labels) */
+.form-floating {
+    position: relative;
+    margin-bottom: 1rem;
+}
+
+.form-floating > .form-control,
+.form-floating > .form-select {
+    height: calc(3.5rem + 2px);
+    line-height: 1.25;
+    padding: 1rem 0.75rem;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-floating > .form-control:focus,
+.form-floating > .form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.form-floating > label {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    padding: 1rem 0.75rem;
+    pointer-events: none;
+    border: 1px solid transparent;
+    transform-origin: 0 0;
+    transition: opacity 0.1s ease-in-out, transform 0.1s ease-in-out;
+    font-weight: 500;
+    color: #6c757d;
+}
+
+/* Campos novos (para criação) */
+.new-field {
+    display: none;
+    animation: fadeInDown 0.3s ease;
+}
+
+.new-field.show {
+    display: block;
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Switch personalizado */
+.form-switch .form-check-input {
+    width: 2.5rem;
+    height: 1.25rem;
+    border-radius: 1.25rem;
+    transition: all 0.3s ease;
+}
+
+.form-switch .form-check-input:checked {
+    background-color: var(--success-color);
+    border-color: var(--success-color);
+}
+
+.form-switch .form-check-input:focus {
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+}
+
+/* Status badges específicos para máquinas */
+.badge-funcionamento {
+    background-color: var(--success-color) !important;
+}
+
+.badge-manutencao {
+    background-color: var(--warning-color) !important;
+    color: #000 !important;
+}
+
+.badge-fora-servico {
+    background-color: var(--danger-color) !important;
+}
+
+/* Status badges específicos para instrutores/membros */
+.badge-disponivel {
+    background-color: var(--success-color) !important;
+}
+
+.badge-ocupado {
+    background-color: var(--warning-color) !important;
+    color: #000 !important;
+}
+
+.badge-ausente {
+    background-color: var(--secondary-color) !important;
+}
+
+/* Layout responsivo para formulários */
+@media (max-width: 768px) {
+    .detail-form-container {
+        padding: 0 10px;
+    }
+    
+    .instructor-form,
+    .member-form,
+    .machine-form {
+        max-width: 100%;
+    }
+    
+    .form-section {
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .action-buttons {
+        position: relative;
+        top: auto;
+        margin-top: 1rem;
+    }
+}
+
+/* Melhorias visuais para campos de formulário */
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Estilo para campos obrigatórios */
+.required-field label::after {
+    content: " *";
+    color: var(--danger-color);
+    font-weight: bold;
+}
+
+/* Grupo de botões inline */
+.btn-group-inline {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.btn-group-inline .btn {
+    flex: 1;
+    min-width: 120px;
+}
+
+/* Cards informativos */
+.info-card {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.info-card h6 {
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+/* Alertas contextuais */
+.contextual-alert {
+    border-left: 4px solid var(--primary-color);
+    background-color: rgba(0, 123, 255, 0.1);
+    padding: 1rem;
+    border-radius: 0 8px 8px 0;
+    margin-bottom: 1rem;
+}
+
+.contextual-alert.warning {
+    border-left-color: var(--warning-color);
+    background-color: rgba(255, 193, 7, 0.1);
+}
+
+.contextual-alert.success {
+    border-left-color: var(--success-color);
+    background-color: rgba(40, 167, 69, 0.1);
+}
+
+.contextual-alert.danger {
+    border-left-color: var(--danger-color);
+    background-color: rgba(220, 53, 69, 0.1);
+}
+
+/* Classes adicionais para componentes específicos */
+.status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.status-text {
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+/* Exemplo de uso das classes unificadas */
+/*
+Para usar o design padrão nos formulários, envolver o conteúdo em:
+<div class="detail-form-container">
+    <div class="instructor-form"> ou <div class="member-form"> ou <div class="machine-form">
+        <div class="form-section">
+            <h5><i class="fas fa-user"></i> Informações Básicas</h5>
+            <!-- campos do formulário -->
+        </div>
+    </div>
+</div>
+*/
 
 /* Responsive */
 @media (max-width: 576px) {

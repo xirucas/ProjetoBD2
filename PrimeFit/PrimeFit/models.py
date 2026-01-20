@@ -1,6 +1,5 @@
 from django.db import models
 
-# Model for vw_user_authentication
 class UserAuthentication(models.Model):
     userid = models.AutoField(primary_key=True)
     email = models.CharField(max_length=254)
@@ -14,7 +13,6 @@ class UserAuthentication(models.Model):
         managed = False
         db_table = 'vw_user_authentication'
 
-# Model for vw_plan (used in registration)
 class Plan(models.Model):
     planid = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100)
@@ -25,7 +23,6 @@ class Plan(models.Model):
         managed = False
         db_table = 'vw_plan'
 
-# Model for actual plan table (for editing)
 class PlanTable(models.Model):
     planid = models.AutoField(primary_key=True)
     name = models.CharField(max_length=80)
@@ -40,7 +37,6 @@ class PlanTable(models.Model):
         managed = False
         db_table = 'plan'
 
-# Model for vw_email_exists
 class EmailExists(models.Model):
     userid = models.AutoField(primary_key=True)
     email = models.CharField(max_length=254)
@@ -49,7 +45,6 @@ class EmailExists(models.Model):
         managed = False
         db_table = 'vw_email_exists'
 
-# Model for vw_member_stats_month
 class MemberStatsMonth(models.Model):
     checkin_count = models.IntegerField()
     class_bookings = models.IntegerField()
@@ -63,7 +58,6 @@ class MemberStatsMonth(models.Model):
         managed = False
         db_table = 'vw_member_stats_month'
 
-# Model for vw_member_schedule_classes
 class MemberScheduleClasses(models.Model):
     class_name = models.CharField(max_length=100)
     date = models.DateField()
@@ -77,7 +71,6 @@ class MemberScheduleClasses(models.Model):
         managed = False
         db_table = 'vw_member_schedule_classes'
 
-# Model for vw_member_available_classes
 class MemberAvailableClasses(models.Model):
     classscheduleid = models.AutoField(primary_key=True)
     class_name = models.CharField(max_length=100)
@@ -92,7 +85,6 @@ class MemberAvailableClasses(models.Model):
         managed = False
         db_table = 'vw_member_available_classes'
 
-# Model for vw_member_account_details
 class MemberAccountDetails(models.Model):
     memberid = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100)
@@ -118,7 +110,6 @@ class MemberAccountDetails(models.Model):
         managed = False
         db_table = 'vw_member_account_details'
 
-# Model for vw_instructor_info
 class InstructorInfo(models.Model):
     instructorid = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100)
@@ -147,7 +138,6 @@ class InstructorMonthlyStats(models.Model):
         managed = False
         db_table = 'vw_instructor_stats_month'
 
-# Model for vw_instructor_classes
 class InstructorClasses(models.Model):
     classid = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100)
@@ -156,6 +146,17 @@ class InstructorClasses(models.Model):
     duration_minutes = models.IntegerField()
     instructorid = models.IntegerField()
     userid = models.IntegerField()
+    classscheduleid = models.IntegerField(null=True, blank=True)
+    date = models.DateField(null=True, blank=True)
+    starttime = models.TimeField(null=True, blank=True)
+    endtime = models.TimeField(null=True, blank=True)
+    start_time = models.CharField(max_length=5, null=True, blank=True) 
+    end_time = models.CharField(max_length=5, null=True, blank=True)   
+    day_of_week = models.IntegerField(null=True, blank=True)  
+    current_participants = models.IntegerField(null=True, blank=True)
+    max_participants = models.IntegerField(null=True, blank=True)
+    maxparticipants = models.IntegerField(null=True, blank=True)  
+    isactive = models.BooleanField(default=True)
     
     class Meta:
         managed = False
@@ -165,16 +166,10 @@ class InstructorClassesToday(models.Model):
     classid = models.AutoField(primary_key=True)
     class_name = models.CharField(max_length=100)
     room = models.CharField(max_length=50)
-    capacity = models.IntegerField()
-    duration_minutes = models.IntegerField()
-    classscheduleid = models.IntegerField()
     date = models.DateField()
     starttime = models.TimeField()
     endtime = models.TimeField()
     maxparticipants = models.IntegerField()
-    start_time = models.CharField(max_length=5)
-    end_time = models.CharField(max_length=5)
-    time_slot = models.CharField(max_length=13)
     enrolled_students = models.IntegerField()
     instructorid = models.IntegerField()
     userid = models.IntegerField()
@@ -183,7 +178,6 @@ class InstructorClassesToday(models.Model):
         managed = False
         db_table = 'vw_instructor_classes_today'
 
-# Model for vw_class_schedules
 class ClassSchedules(models.Model):
     classscheduleid = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100)
@@ -199,7 +193,6 @@ class ClassSchedules(models.Model):
         managed = False
         db_table = 'vw_class_schedules'
 
-# Model for vw_dashboard_stats
 class DashboardStats(models.Model):
     total_members = models.IntegerField()
     total_instructors = models.IntegerField()
@@ -210,8 +203,6 @@ class DashboardStats(models.Model):
         managed = False
         db_table = 'vw_dashboard_stats'
 
-
-# Model for vw_all_checkins
 class AllCheckins(models.Model):
     checkinid = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100)
@@ -223,8 +214,6 @@ class AllCheckins(models.Model):
         managed = False
         db_table = 'vw_all_checkins'
 
-
-# Model for vw_member_payment_history
 class MemberPaymentHistory(models.Model):
     paymentid = models.AutoField(primary_key=True)
     payment_date = models.DateField()
@@ -239,7 +228,6 @@ class MemberPaymentHistory(models.Model):
         managed = False
         db_table = 'vw_member_payment_history'
 
-# Model for vw_member_checkin_history
 class MemberCheckinHistory(models.Model):
     checkinid = models.AutoField(primary_key=True)
     checkin_date = models.DateField()
@@ -254,7 +242,6 @@ class MemberCheckinHistory(models.Model):
         managed = False
         db_table = 'vw_member_checkin_history'
 
-# Model for vw_instructor_next_class_members
 class InstructorNextClassMembers(models.Model):
     class_name = models.CharField(max_length=100)
     class_time = models.CharField(max_length=5)
@@ -272,14 +259,12 @@ class InstructorNextClassMembers(models.Model):
         managed = False
         db_table = 'vw_instructor_next_class_members'
 
-# Model for vw_instructor_class_history
 class InstructorClassHistory(models.Model):
     date = models.DateField()
-    schedule = models.CharField(max_length=11)  # Format: HH:MM-HH:MM
+    schedule = models.CharField(max_length=11)
     class_name = models.CharField(max_length=100)
     room = models.CharField(max_length=50)
     enrolled = models.IntegerField()
-    present = models.IntegerField()
     rate = models.DecimalField(max_digits=5, decimal_places=2)
     instructorid = models.IntegerField()
     instructor_userid = models.IntegerField()
@@ -288,8 +273,6 @@ class InstructorClassHistory(models.Model):
         managed = False
         db_table = 'vw_instructor_class_history'
 
-
-# Model for vw_instructor_week_performance
 class InstructorWeekPerformance(models.Model):
     instructorid = models.IntegerField(primary_key=True)
     instructor_userid = models.IntegerField()
@@ -303,7 +286,6 @@ class InstructorWeekPerformance(models.Model):
         managed = False
         db_table = 'vw_instructor_week_performance'
 
-# Model for vw_instructor_popular_classes
 class InstructorPopularClasses(models.Model):
     instructorid = models.IntegerField()
     instructor_userid = models.IntegerField()
@@ -324,7 +306,14 @@ class ManagerMembersManagement(models.Model):
     member_name = models.CharField(max_length=100)
     email = models.CharField(max_length=254)
     member_phone = models.CharField(max_length=15)
-    plan_name = models.CharField(max_length=100)   
+    plan_name = models.CharField(max_length=100)
+    member_gender = models.CharField(max_length=10)
+    member_birthdate = models.DateField()
+    member_address = models.CharField(max_length=255)
+    member_nif = models.CharField(max_length=15)
+    member_city = models.CharField(max_length=100)
+    member_postalcode = models.CharField(max_length=20)
+    member_iban = models.CharField(max_length=34)
     status = models.CharField(max_length=20)
     member_registration_date = models.DateField()
     planid = models.IntegerField()
@@ -334,7 +323,6 @@ class ManagerMembersManagement(models.Model):
         managed = False
         db_table = 'vw_manager_members_management'
 
-# Model for vw_manager_class_schedule
 class ManagerClassSchedule(models.Model):
     classscheduleid = models.AutoField(primary_key=True)
     class_date = models.DateField()
@@ -358,7 +346,6 @@ class ManagerClassSchedule(models.Model):
         managed = False
         db_table = 'vw_manager_class_schedule'
 
-# Model for vw_manager_schedule_filters
 class ManagerScheduleFilters(models.Model):
     filter_type = models.CharField(max_length=20, primary_key=True)
     filter_id = models.IntegerField(null=True, blank=True)
@@ -369,8 +356,6 @@ class ManagerScheduleFilters(models.Model):
         managed = False
         db_table = 'vw_manager_schedule_filters'
 
-
-# Model for vw_existing_classes
 class ExistingClasses(models.Model):
     classid = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=100)
@@ -380,11 +365,9 @@ class ExistingClasses(models.Model):
     duration_minutes = models.IntegerField()
     
     class Meta:
-        managed = False  # This is a database view
+        managed = False  
         db_table = 'vw_existing_classes'
 
-
-# Model for vw_class_enrolled_members  
 class ClassEnrolledMembers(models.Model):
     classscheduleid = models.IntegerField()
     member_name = models.CharField(max_length=150)
@@ -395,11 +378,9 @@ class ClassEnrolledMembers(models.Model):
     bookingdate = models.DateTimeField()
     
     class Meta:
-        managed = False  # This is a database view
+        managed = False  
         db_table = 'vw_class_enrolled_members'
 
-
-# Model for vw_member_data
 class MemberData(models.Model):
     memberid = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=150)
@@ -414,11 +395,9 @@ class MemberData(models.Model):
     userid = models.IntegerField()
     
     class Meta:
-        managed = False  # This is a database view
+        managed = False  
         db_table = 'vw_member_data'
 
-
-# Model for vw_classes_for_member
 class ClassesForMember(models.Model):
     classscheduleid = models.IntegerField(primary_key=True)
     class_name = models.CharField(max_length=100)
@@ -430,11 +409,9 @@ class ClassesForMember(models.Model):
     available_spots = models.IntegerField()
     
     class Meta:
-        managed = False  # This is a database view
+        managed = False  
         db_table = 'vw_classes_for_member'
 
-
-# Model for vw_all_members
 class AllMembers(models.Model):
     memberid = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=150)
@@ -443,11 +420,9 @@ class AllMembers(models.Model):
     isactive = models.BooleanField()
     
     class Meta:
-        managed = False  # This is a database view
+        managed = False  
         db_table = 'vw_all_members'
 
-
-# Model for vw_all_classes  
 class AllClasses(models.Model):
     classscheduleid = models.IntegerField(primary_key=True)
     class_name = models.CharField(max_length=100)
@@ -460,11 +435,9 @@ class AllClasses(models.Model):
     enrolled_count = models.IntegerField()
     
     class Meta:
-        managed = False  # This is a database view
+        managed = False  
         db_table = 'vw_all_classes'
 
-
-# Model for vw_instructor_daily_dashboard 
 class InstructorDailyDashboard(models.Model):
     instructorid = models.IntegerField(primary_key=True)
     userid = models.IntegerField()
@@ -477,11 +450,9 @@ class InstructorDailyDashboard(models.Model):
     next_class_room = models.CharField(max_length=50, null=True, blank=True)
     
     class Meta:
-        managed = False  # This is a database view
+        managed = False  
         db_table = 'vw_instructor_daily_dashboard'
 
-
-# Model for room conflict checking function
 class RoomConflictCheck(models.Model):
     room = models.CharField(max_length=50)
     date = models.DateField()
@@ -491,11 +462,9 @@ class RoomConflictCheck(models.Model):
     has_conflict = models.BooleanField()
     
     class Meta:
-        managed = False  # This represents a function call
+        managed = False  
         db_table = 'fn_check_room_conflict'
 
-
-# Model for instructor conflict checking function  
 class InstructorConflictCheck(models.Model):
     instructor_id = models.IntegerField()
     date = models.DateField()
@@ -505,52 +474,11 @@ class InstructorConflictCheck(models.Model):
     has_conflict = models.BooleanField()
     
     class Meta:
-        managed = False  # This represents a function call
+        managed = False  
         db_table = 'fn_check_instructor_conflict'
 
-
-# Complete model list for all database views:
-# ✅ vw_user_authentication - UserAuthentication
-# ✅ vw_email_exists - EmailExists  
-# ✅ vw_plan - Plan
-# ✅ vw_member_data - MemberData
-# ✅ vw_member_stats_month - MemberStatsMonth
-# ✅ vw_member_schedule_classes - MemberScheduleClasses
-# ✅ vw_member_available_classes - MemberAvailableClasses
-# ✅ vw_classes_for_member - ClassesForMember
-# ✅ vw_member_account_details - MemberAccountDetails
-# ✅ vw_instructor_info - InstructorInfo
-# ✅ vw_instructor_classes - InstructorClasses
-# ✅ vw_class_schedules - ClassSchedules
-# ✅ vw_dashboard_stats - DashboardStats
-# ✅ vw_all_members - AllMembers
-# ✅ vw_all_classes - AllClasses
-# ✅ vw_all_checkins - AllCheckins
-# ✅ vw_machines - Machines
-# ✅ vw_payments - Payments
-# ✅ vw_member_payment_history - MemberPaymentHistory
-# ✅ vw_member_checkin_history - MemberCheckinHistory
-# ✅ vw_instructor_stats_month - InstructorMonthlyStats
-# ✅ vw_instructor_daily_dashboard - InstructorDailyDashboard
-# ✅ vw_instructor_classes_today - InstructorClassesToday
-# ✅ vw_instructor_next_class_members - InstructorNextClassMembers
-# ✅ vw_instructor_class_history - InstructorClassHistory
-# ✅ vw_instructor_week_performance - InstructorWeekPerformance
-# ✅ vw_instructor_popular_classes - InstructorPopularClasses
-# ✅ vw_manager_members_management - ManagerMembersManagement
-# ✅ vw_manager_class_schedule - ManagerClassSchedule
-# ✅ vw_manager_schedule_filters - ManagerScheduleFilters
-# ✅ vw_existing_classes - ExistingClasses
-# ✅ vw_class_enrolled_members - ClassEnrolledMembers
-# ✅ fn_check_room_conflict - RoomConflictCheck
-# ✅ fn_check_instructor_conflict - InstructorConflictCheck
-# ✅ vw_machine_summary - MachineSummary
-# ✅ vw_machine_inventory - MachineInventory
-
-
-# Model for vw_machine_summary
 class MachineSummary(models.Model):
-    id = models.IntegerField(primary_key=True, default=1)  # Fake ID for aggregation views
+    id = models.IntegerField(primary_key=True, default=1) 
     total_machines = models.IntegerField()
     functioning_machines = models.IntegerField()
     maintenance_machines = models.IntegerField()
@@ -558,11 +486,9 @@ class MachineSummary(models.Model):
     functioning_percentage = models.DecimalField(max_digits=5, decimal_places=1)
     
     class Meta:
-        managed = False  # This is a database view
+        managed = False  
         db_table = 'vw_machine_summary'
 
-
-# Model for vw_machine_inventory  
 class MachineInventory(models.Model):
     machineid = models.IntegerField(primary_key=True)
     codigo = models.CharField(max_length=50)
@@ -576,39 +502,31 @@ class MachineInventory(models.Model):
     machinestatusid = models.IntegerField()
     
     class Meta:
-        managed = False  # This is a database view
+        managed = False  
         db_table = 'vw_machine_inventory'
 
-
-# Model para vw_machine_categories
 class MachineCategories(models.Model):
     categoria = models.CharField(max_length=50, primary_key=True)
     
     class Meta:
-        managed = False  # This is a database view
+        managed = False  
         db_table = 'vw_machine_categories'
 
-
-# Model para vw_machine_brands
 class MachineBrands(models.Model):
     marca = models.CharField(max_length=100, primary_key=True)
     
     class Meta:
-        managed = False  # This is a database view
+        managed = False  
         db_table = 'vw_machine_brands'
 
-
-# Model para vw_machine_statuses
 class MachineStatuses(models.Model):
     machinestatusid = models.IntegerField(primary_key=True)
     status = models.CharField(max_length=30)
     
     class Meta:
-        managed = False  # This is a database view
+        managed = False  
         db_table = 'vw_machine_statuses'
 
-
-# Model para vw_machine_detail
 class MachineDetail(models.Model):
     machineid = models.IntegerField(primary_key=True)
     codigo = models.CharField(max_length=50)
@@ -622,17 +540,11 @@ class MachineDetail(models.Model):
     machinestatusid = models.IntegerField()
     
     class Meta:
-        managed = False  # This is a database view
+        managed = False  
         db_table = 'vw_machine_detail'
 
-
-# ======================================================================
-# MODELS PARA GERENCIAMENTO DE PAGAMENTOS (DASHBOARD DE PAGAMENTOS)
-# ======================================================================
-
-# Model para vw_payment_dashboard_summary - Resumo dos 4 quadrados superiores
 class PaymentDashboardSummary(models.Model):
-    id = models.IntegerField(primary_key=True, default=1)  # Fake ID for Django ORM
+    id = models.IntegerField(primary_key=True, default=1)  
     receita_mensal = models.DecimalField(max_digits=10, decimal_places=2)
     pagamentos_hoje = models.DecimalField(max_digits=10, decimal_places=2)
     transacoes_hoje = models.IntegerField()
@@ -642,32 +554,28 @@ class PaymentDashboardSummary(models.Model):
     pagamentos_em_atraso = models.IntegerField()
     
     class Meta:
-        managed = False  # This is a database view
+        managed = False  
         db_table = 'vw_payment_dashboard_summary'
 
-
-# Model para vw_payment_recent_transactions - 3 últimos pagamentos recentes
 class PaymentRecentTransactions(models.Model):
     paymentid = models.IntegerField(primary_key=True)
-    valor = models.CharField(max_length=20)  # Formatado como "€XX.XX"
+    valor = models.CharField(max_length=20) 
     nome_membro = models.CharField(max_length=100)
-    id_membro = models.CharField(max_length=20)  # Formatado como "ID: XXXX"
+    id_membro = models.CharField(max_length=20) 
     plano = models.CharField(max_length=100)
     metodo_pagamento = models.CharField(max_length=50)
     data_pagamento = models.DateField()
     
     class Meta:
-        managed = False  # This is a database view
+        managed = False  
         db_table = 'vw_payment_recent_transactions'
 
-
-# Model para vw_payment_history - Histórico completo com filtros
 class PaymentHistory(models.Model):
     paymentid = models.IntegerField(primary_key=True)
     nome_membro = models.CharField(max_length=100)
     id_membro = models.IntegerField()
     plano = models.CharField(max_length=100)
-    valor = models.CharField(max_length=20)  # Formatado como "€XX.XX"
+    valor = models.CharField(max_length=20)  
     metodo_pagamento = models.CharField(max_length=50)
     data_vencimento = models.DateField()
     data_pagamento = models.DateField(null=True, blank=True)
@@ -676,28 +584,22 @@ class PaymentHistory(models.Model):
     valor_numerico = models.DecimalField(max_digits=10, decimal_places=2)
     
     class Meta:
-        managed = False  # This is a database view
+        managed = False  
         db_table = 'vw_payment_history'
 
 
-# Model para vw_payment_monthly_summary - Resumo mensal para quadrados inferiores
 class PaymentMonthlySummary(models.Model):
     id = models.IntegerField(primary_key=True)  # Fake ID for Django ORM
     total_faturado = models.DecimalField(max_digits=10, decimal_places=2)
     total_recebido = models.DecimalField(max_digits=10, decimal_places=2)
     pendentes = models.DecimalField(max_digits=10, decimal_places=2)
     em_atraso = models.DecimalField(max_digits=10, decimal_places=2)
-    metodos_pagamento = models.TextField(null=True, blank=True)  # String dinâmica com métodos
+    metodos_pagamento = models.TextField(null=True, blank=True) 
     
     class Meta:
-        managed = False  # This is a database view
+        managed = False  
         db_table = 'vw_payment_monthly_summary'
 
-# ============================================================================
-# MODELS PARA GERENCIAMENTO DE PLANOS
-# ============================================================================
-
-# Model para vw_plan_statistics - Estatísticas dos planos (4 quadrados do topo)
 class PlanStatistics(models.Model):
     planid = models.IntegerField(primary_key=True)
     plan_name = models.CharField(max_length=100)
@@ -707,18 +609,16 @@ class PlanStatistics(models.Model):
     percentage = models.DecimalField(max_digits=5, decimal_places=1)
     
     class Meta:
-        managed = False  # This is a database view
+        managed = False  
         db_table = 'vw_plan_statistics'
 
-# Model para vw_total_active_members - Total de membros ativos (4º quadrado)
 class TotalActiveMembers(models.Model):
     total_members = models.IntegerField(primary_key=True)
     
     class Meta:
-        managed = False  # This is a database view
+        managed = False  
         db_table = 'vw_total_active_members'
 
-# Model para vw_plan_details - Detalhes dos planos (cartas inferiores)
 class PlanDetails(models.Model):
     planid = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=100)
@@ -726,9 +626,109 @@ class PlanDetails(models.Model):
     access24h = models.BooleanField()
     description = models.TextField(null=True, blank=True)
     member_count = models.IntegerField()
-    price_display = models.CharField(max_length=20)  # Formatado como "€XX/mês"
+    price_display = models.CharField(max_length=20)  
     
     class Meta:
-        managed = False  # This is a database view
+        managed = False  
         db_table = 'vw_plan_details'
 
+class MemberUseridLookup(models.Model):
+    memberid = models.IntegerField(primary_key=True)
+    userid = models.IntegerField()
+    name = models.CharField(max_length=100)
+    email = models.CharField(max_length=254)
+    
+    class Meta:
+        managed = False
+        db_table = 'vw_member_userid_lookup'
+
+class MemberEnrolledClasses(models.Model):
+    memberid = models.IntegerField()
+    classscheduleid = models.IntegerField(primary_key=True)
+    bookingdate = models.DateTimeField()
+    class_name = models.CharField(max_length=100)
+    date = models.DateField()
+    starttime = models.TimeField()
+    endtime = models.TimeField()
+    
+    class Meta:
+        managed = False
+        db_table = 'vw_member_enrolled_classes'
+
+class UserPasswordCheck(models.Model):
+    userid = models.IntegerField(primary_key=True)
+    password = models.CharField(max_length=255)
+    isactive = models.BooleanField()
+    
+    class Meta:
+        managed = False
+        db_table = 'vw_user_password_check'
+
+class MemberClassHistory(models.Model):
+    classscheduleid = models.IntegerField(primary_key=True)
+    class_name = models.CharField(max_length=80)
+    date = models.DateField()
+    starttime = models.TimeField()
+    endtime = models.TimeField()
+    room = models.CharField(max_length=20)
+    instructor_name = models.CharField(max_length=120)
+    class_description = models.TextField(null=True, blank=True)
+    userid = models.IntegerField()
+    memberid = models.IntegerField()
+    booking_date = models.DateTimeField()
+    
+    class Meta:
+        managed = False
+        db_table = 'vw_member_class_history'
+
+class MemberClassEvaluationDetails(models.Model):
+    classscheduleid = models.IntegerField(primary_key=True)
+    instructorid = models.IntegerField()
+    class_name = models.CharField(max_length=100)
+    member_name = models.CharField(max_length=100)
+    memberid = models.IntegerField()
+    booking_memberid = models.IntegerField()
+    
+    class Meta:
+        managed = False
+        db_table = 'vw_member_class_evaluation_details'
+
+class ManagerRecentCheckins(models.Model):
+    checkinid = models.AutoField(primary_key=True)
+    member_name = models.CharField(max_length=100)
+    memberid = models.IntegerField()
+    entrancetime = models.TimeField()
+    exittime = models.TimeField(null=True, blank=True)
+    status = models.CharField(max_length=20)
+    
+    class Meta:
+        managed = False
+        db_table = 'vw_manager_recent_checkins'
+
+class ManagerUpcomingClasses(models.Model):
+    classid = models.AutoField(primary_key=True)
+    class_name = models.CharField(max_length=100)
+    starttime = models.TimeField()
+    endtime = models.TimeField()
+    instructor_name = models.CharField(max_length=100)
+    instructorid = models.IntegerField()
+    room = models.CharField(max_length=50)
+    maxcapacity = models.IntegerField()
+    enrolled_count = models.IntegerField()
+    is_full = models.BooleanField()
+    
+    class Meta:
+        managed = False
+        db_table = 'vw_manager_upcoming_classes'
+
+class ManagerDashboardStats(models.Model):
+    total_members = models.IntegerField()
+    total_instructors = models.IntegerField()
+    active_memberships = models.IntegerField()
+    today_checkins = models.IntegerField()
+    today_classes = models.IntegerField()
+    monthly_revenue = models.DecimalField(max_digits=10, decimal_places=2)
+    
+    class Meta:
+        managed = False
+        db_table = 'vw_manager_dashboard_stats'

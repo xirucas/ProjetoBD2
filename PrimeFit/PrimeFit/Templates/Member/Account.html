@@ -5,6 +5,9 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1>Minha Conta</h1>
+    <a href="{% url 'member_account_edit' %}" class="btn btn-primary">
+        <i class="fas fa-edit me-2"></i>Editar Perfil
+    </a>
 </div>
 
 
@@ -63,7 +66,7 @@
                         <h3 class="text-warning">{{ member_details.next_payment_date }}</h3>
                         <p class="text-muted">Próximo Pagamento</p>
                     {% else %}
-                        <h3 class="text-success">Em dia</h3>
+                        <h3 class="{{ payment_status_class }}">{{ payment_status }}</h3>
                         <p class="text-muted">Status do Pagamento</p>
                     {% endif %}
                 </div>
@@ -72,10 +75,14 @@
     </div>
 </div>
 
-<!-- Histórico de Pagamentos -->
 <div class="card mb-4">
-    <div class="card-header">
-        <h5>Histórico de Pagamentos</h5>
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Pagamentos</h5>
+        {% if payment_history %}
+            <small class="text-muted">
+                Exibindo {{ payment_history.start_index }}-{{ payment_history.end_index }} de {{ payment_history.paginator.count }} pagamentos
+            </small>
+        {% endif %}
     </div>
     <div class="card-body">
         {% if payment_history %}
@@ -88,6 +95,7 @@
                             <th>Método</th>
                             <th>Status</th>
                             <th>Data Pagamento</th>
+                            <th>Ação</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -112,11 +120,64 @@
                                     <span class="text-muted">-</span>
                                 {% endif %}
                             </td>
+                            <td>
+                                {% if payment.payment_status != 'Pago' %}
+                                    <button type="button" class="btn btn-sm btn-primary" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#paymentModal"
+                                            data-payment-id="{{ payment.paymentid }}"
+                                            data-payment-amount="{{ payment.payment_amount }}"
+                                            data-payment-date="{{ payment.payment_date|date:'d/m/Y' }}">
+                                        <i class="fas fa-credit-card me-1"></i>Pagar
+                                    </button>
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
+            
+            <!-- Paginação -->
+            {% if payment_history.has_other_pages %}
+                <nav aria-label="Navegação das páginas" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        {% if payment_history.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ payment_history.previous_page_number }}">Anterior</a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <a class="page-link" href="#" tabindex="-1">Anterior</a>
+                            </li>
+                        {% endif %}
+                        
+                        {% for num in payment_history.paginator.page_range %}
+                            {% if payment_history.number == num %}
+                                <li class="page-item active">
+                                    <a class="page-link" href="#">{{ num }}</a>
+                                </li>
+                            {% elif num > payment_history.number|add:'-3' and num < payment_history.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if payment_history.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ payment_history.next_page_number }}">Próximo</a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <a class="page-link" href="#" tabindex="-1">Próximo</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            {% endif %}
         {% else %}
             <div class="alert alert-info">
                 <i class="fas fa-info-circle me-2"></i>
@@ -126,55 +187,171 @@
     </div>
 </div>
 
-<!-- Histórico de Check-ins -->
-<div class="card mb-4">
-    <div class="card-header">
-        <h5>Histórico de Check-ins Recentes</h5>
-    </div>
-    <div class="card-body">
-        {% if checkin_history %}
-            <div class="table-responsive">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Data</th>
-                            <th>Check-in</th>
-                            <th>Check-out</th>
-                            <th>Duração</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for checkin in checkin_history %}
-                        <tr>
-                            <td>{{ checkin.checkin_date|date:"d/m/Y" }}</td>
-                            <td>{{ checkin.entrancetime|time:"H:i" }}</td>
-                            <td>
-                                {% if checkin.exittime %}
-                                    {{ checkin.exittime|time:"H:i" }}
-                                {% else %}
-                                    <span class="badge bg-success">Ativo</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                {% if checkin.duration_formatted %}
-                                    {{ checkin.duration_formatted }}
-                                {% else %}
-                                    <span class="text-muted">Em curso</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+<!-- Modal de Pagamento -->
+<div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="paymentModalLabel">
+                    <i class="fas fa-credit-card me-2"></i>Efetuar Pagamento
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-        {% else %}
-            <div class="alert alert-info">
-                <i class="fas fa-info-circle me-2"></i>
-                Nenhum histórico de check-ins encontrado.
-            </div>
-        {% endif %}
+            <form method="post" action="{% url 'member_process_payment' %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Atenção:</strong> Este é um sistema de demonstração. Nenhum pagamento real será processado.
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label"><strong>Data de Vencimento:</strong></label>
+                            <p id="payment-date" class="mb-0">-</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label"><strong>Valor:</strong></label>
+                            <p id="payment-value" class="mb-0 text-success fw-bold">-</p>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="mb-3">
+                        <label for="payment_method" class="form-label">Método de Pagamento *</label>
+                        <select class="form-select" id="payment_method" name="payment_method" required>
+                            <option value="">Selecione o método...</option>
+                            <option value="Multibanco">Multibanco</option>
+                            <option value="MBWay">MB Way</option>
+                            <option value="Cartão de Crédito">Cartão de Crédito</option>
+                            <option value="Cartão de Débito">Cartão de Débito</option>
+                            <option value="Transferência Bancária">Transferência Bancária</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3" id="card_details" style="display: none;">
+                        <div class="row">
+                            <div class="col-md-8 mb-3">
+                                <label for="card_number" class="form-label">Número do Cartão</label>
+                                <input type="text" class="form-control" id="card_number" 
+                                       placeholder="**** **** **** ****" maxlength="19">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="card_cvv" class="form-label">CVV</label>
+                                <input type="text" class="form-control" id="card_cvv" 
+                                       placeholder="***" maxlength="4">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="card_expiry" class="form-label">Data de Validade</label>
+                                <input type="text" class="form-control" id="card_expiry" 
+                                       placeholder="MM/AA" maxlength="5">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="card_name" class="form-label">Nome no Cartão</label>
+                                <input type="text" class="form-control" id="card_name" 
+                                       placeholder="Nome completo">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3" id="mbway_details" style="display: none;">
+                        <label for="mbway_phone" class="form-label">Número de Telemóvel</label>
+                        <input type="tel" class="form-control" id="mbway_phone" 
+                               placeholder="+351 9** *** ***" maxlength="13">
+                    </div>
+                    
+                    <input type="hidden" id="payment_id" name="payment_id">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-check me-2"></i>Confirmar Pagamento
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Modal de pagamento
+    const paymentModal = document.getElementById('paymentModal');
+    const paymentMethodSelect = document.getElementById('payment_method');
+    const cardDetails = document.getElementById('card_details');
+    const mbwayDetails = document.getElementById('mbway_details');
+    
+    // Quando o modal for aberto
+    paymentModal.addEventListener('show.bs.modal', function(event) {
+        const button = event.relatedTarget;
+        const paymentId = button.getAttribute('data-payment-id');
+        const paymentAmount = button.getAttribute('data-payment-amount');
+        const paymentDate = button.getAttribute('data-payment-date');
+        
+        // Preencher dados do pagamento
+        document.getElementById('payment_id').value = paymentId;
+        document.getElementById('payment-date').textContent = paymentDate;
+        document.getElementById('payment-value').textContent = '€' + paymentAmount;
+    });
+    
+    // Mostrar campos específicos baseado no método de pagamento
+    paymentMethodSelect.addEventListener('change', function() {
+        const selectedMethod = this.value;
+        
+        // Esconder todos os campos específicos
+        cardDetails.style.display = 'none';
+        mbwayDetails.style.display = 'none';
+        
+        // Mostrar campos específicos
+        if (selectedMethod === 'Cartão de Crédito' || selectedMethod === 'Cartão de Débito') {
+            cardDetails.style.display = 'block';
+        } else if (selectedMethod === 'MBWay') {
+            mbwayDetails.style.display = 'block';
+        }
+    });
+    
+    // Formatação automática do número do cartão
+    const cardNumberInput = document.getElementById('card_number');
+    if (cardNumberInput) {
+        cardNumberInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            value = value.replace(/(.{4})/g, '$1 ').trim();
+            e.target.value = value;
+        });
+    }
+    
+    // Formatação automática da data de validade
+    const cardExpiryInput = document.getElementById('card_expiry');
+    if (cardExpiryInput) {
+        cardExpiryInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length >= 2) {
+                value = value.substring(0, 2) + '/' + value.substring(2, 4);
+            }
+            e.target.value = value;
+        });
+    }
+    
+    // Formatação do número de telemóvel
+    const mbwayPhoneInput = document.getElementById('mbway_phone');
+    if (mbwayPhoneInput) {
+        mbwayPhoneInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.startsWith('351')) {
+                value = value.substring(3);
+            }
+            if (value.length > 0) {
+                value = '+351 ' + value.replace(/(\d{3})(\d{3})(\d{3})/, '$1 $2 $3');
+            }
+            e.target.value = value;
+        });
+    }
+});
+</script>
 
 {% endblock %}

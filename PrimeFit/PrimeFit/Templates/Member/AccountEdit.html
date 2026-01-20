@@ -1,0 +1,285 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Editar Perfil{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Editar Perfil</h1>
+    <a href="{% url 'member_account' %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left me-2"></i>Voltar
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5>Informações Pessoais</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="name" class="form-label">Nome Completo</label>
+                            <input type="text" class="form-control" id="name" name="name" 
+                                   value="{{ member_details.name }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" 
+                                   value="{{ member_details.email }}" required>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="phone" class="form-label">Telefone</label>
+                            <input type="tel" class="form-control" id="phone" name="phone" 
+                                   value="{{ member_details.phone }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="birthdate" class="form-label">Data de Nascimento</label>
+                            <input type="date" class="form-control" id="birthdate" name="birthdate" 
+                                   value="{{ member_details.birthdate|date:'Y-m-d' }}">
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="gender" class="form-label">Género</label>
+                            <select class="form-select" id="gender" name="gender">
+                                <option value="">Selecionar...</option>
+                                <option value="Masculino" {% if member_details.gender == 'Masculino' %}selected{% endif %}>Masculino</option>
+                                <option value="Feminino" {% if member_details.gender == 'Feminino' %}selected{% endif %}>Feminino</option>
+                                <option value="Outro" {% if member_details.gender == 'Outro' %}selected{% endif %}>Outro</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="nif" class="form-label">NIF</label>
+                            <input type="text" class="form-control" id="nif" name="nif" 
+                                   value="{{ member_details.nif }}" pattern="[0-9]{9}">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="address" class="form-label">Morada</label>
+                        <input type="text" class="form-control" id="address" name="address" 
+                               value="{{ member_details.address }}">
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="city" class="form-label">Cidade</label>
+                            <input type="text" class="form-control" id="city" name="city" 
+                                   value="{{ member_details.city }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="postalcode" class="form-label">Código Postal</label>
+                            <input type="text" class="form-control" id="postalcode" name="postalcode" 
+                                   value="{{ member_details.postalcode }}" pattern="[0-9]{4}-[0-9]{3}">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="iban" class="form-label">IBAN</label>
+                        <input type="text" class="form-control" id="iban" name="iban" 
+                               value="{{ member_details.iban }}">
+                        <div class="form-text">Usado para débito direto das mensalidades</div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-save me-2"></i>Guardar Alterações
+                        </button>
+                        <a href="{% url 'member_account' %}" class="btn btn-outline-secondary">
+                            Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>Alterar Password</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{% url 'member_change_password' %}">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="current_password" class="form-label">Password Atual</label>
+                        <input type="password" class="form-control{% if messages %}{% for message in messages %}{% if 'Password atual incorreta' in message.message %} is-invalid{% endif %}{% endfor %}{% endif %}" id="current_password" 
+                               name="current_password" required>
+                        {% if messages %}
+                            {% for message in messages %}
+                                {% if 'Password atual incorreta' in message.message %}
+                                    <div class="invalid-feedback">
+                                        Password atual incorreta
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="new_password" class="form-label">Nova Password</label>
+                        <input type="password" class="form-control" id="new_password" 
+                               name="new_password" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="confirm_password" class="form-label">Confirmar Nova Password</label>
+                        <input type="password" class="form-control" id="confirm_password" 
+                               name="confirm_password" required>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-warning w-100">
+                        <i class="fas fa-key me-2"></i>Alterar Password
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5>Informações da Membership</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Plano Atual:</strong> {{ member_details.plan_name }}</p>
+                <p><strong>Mensalidade:</strong> €{{ member_details.monthlyprice }}</p>
+                <p><strong>Data de Adesão:</strong> {{ member_details.startdate|date:"d/m/Y" }}</p>
+                <p><strong>Acesso 24h:</strong> 
+                    {% if member_details.access24h %}
+                        <span class="badge bg-success">Sim</span>
+                    {% else %}
+                        <span class="badge bg-secondary">Não</span>
+                    {% endif %}
+                </p>
+                <small class="text-muted">
+                    Para alterar o plano, contacte a gestão do ginásio.
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Função para limpar erros de validação
+    function clearPasswordErrors() {
+        const currentPasswordInput = document.getElementById('current_password');
+        const currentPasswordFeedback = currentPasswordInput.nextElementSibling;
+        
+        currentPasswordInput.classList.remove('is-invalid');
+        if (currentPasswordFeedback && currentPasswordFeedback.classList.contains('invalid-feedback')) {
+            currentPasswordFeedback.style.display = 'none';
+        }
+    }
+
+    // Função para mostrar erro na password atual
+    function showCurrentPasswordError(message) {
+        const currentPasswordInput = document.getElementById('current_password');
+        let feedbackDiv = currentPasswordInput.nextElementSibling;
+        
+        currentPasswordInput.classList.add('is-invalid');
+        
+        // Criar div de feedback se não existir
+        if (!feedbackDiv || !feedbackDiv.classList.contains('invalid-feedback')) {
+            feedbackDiv = document.createElement('div');
+            feedbackDiv.className = 'invalid-feedback';
+            currentPasswordInput.parentNode.insertBefore(feedbackDiv, currentPasswordInput.nextSibling);
+        }
+        
+        feedbackDiv.textContent = message;
+        feedbackDiv.style.display = 'block';
+    }
+
+    // Limpar erros quando o usuário começar a digitar na password atual
+    const currentPasswordInput = document.getElementById('current_password');
+    if (currentPasswordInput) {
+        currentPasswordInput.addEventListener('input', function() {
+            clearPasswordErrors();
+        });
+    }
+
+    // Interceptar submit do formulário de password
+    const passwordForm = document.querySelector('form[action="{% url 'member_change_password' %}"]');
+    if (passwordForm) {
+        passwordForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            clearPasswordErrors();
+            
+            const formData = new FormData(this);
+            
+            // Fazer requisição AJAX
+            fetch("{% url 'member_change_password' %}", {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Sucesso - mostrar mensagem e redirecionar ou limpar formulário
+                    alert('Password alterada com sucesso!');
+                    this.reset();
+                } else {
+                    // Erro - mostrar no campo apropriado
+                    if (data.error && data.error.includes('Password atual incorreta')) {
+                        showCurrentPasswordError('Password atual incorreta');
+                    } else {
+                        alert(data.error || 'Erro ao alterar password');
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                alert('Erro de conexão. Tente novamente.');
+            });
+        });
+    }
+
+    // Validação de confirmação de password
+    const confirmPassword = document.getElementById('confirm_password');
+    const newPassword = document.getElementById('new_password');
+    
+    if (confirmPassword && newPassword) {
+        confirmPassword.addEventListener('input', function() {
+            if (this.value !== newPassword.value) {
+                this.setCustomValidity('As passwords não coincidem');
+            } else {
+                this.setCustomValidity('');
+            }
+        });
+
+        newPassword.addEventListener('input', function() {
+            if (confirmPassword.value && this.value !== confirmPassword.value) {
+                confirmPassword.setCustomValidity('As passwords não coincidem');
+            } else {
+                confirmPassword.setCustomValidity('');
+            }
+        });
+    }
+    
+    // Formatação automática do código postal
+    const postalCodeInput = document.getElementById('postalcode');
+    if (postalCodeInput) {
+        postalCodeInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, ''); // Remove caracteres não numéricos
+            if (value.length >= 4) {
+                value = value.substring(0, 4) + '-' + value.substring(4, 7);
+            }
+            e.target.value = value;
+        });
+    }
+});
+</script>
+
+{% endblock %}

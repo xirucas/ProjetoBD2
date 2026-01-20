@@ -1,0 +1,328 @@
+{% extends 'base/base.html' %}
+
+{% block title %}
+{% if is_new %}Novo Membro{% else %}{{ member.member_name }}{% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<!-- Usando estilos do primefit.css - sem CSS inline -->
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Formulário Principal -->
+        <div class="col-md-8">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1>
+                        {% if is_new %}
+                            <i class="fas fa-user-plus me-2"></i>Criar Novo Membro
+                        {% else %}
+                            <i class="fas fa-user me-2"></i>{{ member.member_name }}
+                        {% endif %}
+                    </h1>
+                </div>
+            </div>
+
+            <form method="post" class="member-form">
+                {% csrf_token %}
+                
+                <!-- Informações Básicas -->
+                <div class="form-section">
+                    <h5><i class="fas fa-user me-2"></i>Informações Pessoais</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Nome Completo *</label>
+                                {% if is_edit_mode or is_new %}
+                                    <input type="text" class="form-control" id="name" name="name" 
+                                           value="{{ member.member_name|default:'' }}" required>
+                                {% else %}
+                                    <div class="view-mode-field">{{ member.member_name|default:'N/A' }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email *</label>
+                                {% if is_edit_mode or is_new %}
+                                    <input type="email" class="form-control" id="email" name="email" 
+                                           value="{{ member.email|default:'' }}" required>
+                                {% else %}
+                                    <div class="view-mode-field">{{ member.email|default:'N/A' }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="nif" class="form-label">NIF</label>
+                                {% if is_edit_mode or is_new %}
+                                    <input type="text" class="form-control" id="nif" name="nif" 
+                                           value="{{ member.member_nif|default:'' }}">
+                                {% else %}
+                                    <div class="view-mode-field">{{ member.member_nif|default:'N/A' }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="phone" class="form-label">Telefone</label>
+                                {% if is_edit_mode or is_new %}
+                                    <input type="tel" class="form-control" id="phone" name="phone" 
+                                           value="{{ member.member_phone|default:'' }}">
+                                {% else %}
+                                    <div class="view-mode-field">{{ member.member_phone|default:'N/A' }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="birthdate" class="form-label">Data de Nascimento</label>
+                                {% if is_edit_mode or is_new %}
+                                    <input type="date" class="form-control" id="birthdate" name="birthdate" 
+                                           value="{{ member.member_birthdate|date:'Y-m-d'|default:'' }}">
+                                {% else %}
+                                    <div class="view-mode-field">{{ member.member_birthdate|date:"d/m/Y"|default:'N/A' }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="gender" class="form-label">Género</label>
+                                {% if is_edit_mode or is_new %}
+                                    <select class="form-select" id="gender" name="gender">
+                                        <option value="">Selecionar género</option>
+                                        <option value="Masculino" {% if member.member_gender == 'Masculino' %}selected{% endif %}>Masculino</option>
+                                        <option value="Feminino" {% if member.member_gender == 'Feminino' %}selected{% endif %}>Feminino</option>
+                                        <option value="Outro" {% if member.member_gender == 'Outro' %}selected{% endif %}>Outro</option>
+                                    </select>
+                                {% else %}
+                                    <div class="view-mode-field">
+                                        {% if member.member_gender == 'Masculino' %}Masculino
+                                        {% elif member.member_gender == 'Feminino' %}Feminino
+                                        {% elif member.member_gender == 'Outro' %}Outro
+                                        {% else %}N/A{% endif %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Informações de Contacto -->
+                <div class="form-section">
+                    <h5><i class="fas fa-map-marker-alt me-2"></i>Endereço e Contacto</h5>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="mb-3">
+                                <label for="address" class="form-label">Morada</label>
+                                {% if is_edit_mode or is_new %}
+                                    <input type="text" class="form-control" id="address" name="address" 
+                                           value="{{ member.member_address|default:'' }}">
+                                {% else %}
+                                    <div class="view-mode-field">{{ member.member_address|default:'N/A' }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="city" class="form-label">Cidade</label>
+                                {% if is_edit_mode or is_new %}
+                                    <input type="text" class="form-control" id="city" name="city" 
+                                           value="{{ member.member_city|default:'' }}">
+                                {% else %}
+                                    <div class="view-mode-field">{{ member.member_city|default:'N/A' }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="postalcode" class="form-label">Código Postal</label>
+                                {% if is_edit_mode or is_new %}
+                                    <input type="text" class="form-control" id="postalcode" name="postalcode" 
+                                           value="{{ member.member_postalcode|default:'' }}">
+                                {% else %}
+                                    <div class="view-mode-field">{{ member.member_postalcode|default:'N/A' }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="mb-3">
+                                <label for="iban" class="form-label">IBAN</label>
+                                {% if is_edit_mode or is_new %}
+                                    <input type="text" class="form-control" id="iban" name="iban" 
+                                           value="{{ member.member_iban|default:'' }}">
+                                {% else %}
+                                    <div class="view-mode-field">{{ member.member_iban|default:'N/A' }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Informações do Plano -->
+                <div class="form-section">
+                    <h5><i class="fas fa-dumbbell me-2"></i>Plano e Status</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="plan" class="form-label">Plano *</label>
+                                {% if is_edit_mode or is_new %}
+                                    <select class="form-select" id="plan" name="plan" required>
+                                        <option value="">Selecionar plano</option>
+                                        {% for plan in plans %}
+                                            <option value="{{ plan.planid }}" 
+                                                    {% if member.planid == plan.planid %}selected{% endif %}>
+                                                {{ plan.name }} - {{ plan.monthlyprice }}€/mês
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                {% else %}
+                                    <div class="view-mode-field">{{ member.plan_name|default:'N/A' }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% if not is_new %}
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="member_status" class="form-label">Status do Membro</label>
+                                {% if is_edit_mode %}
+                                    <select class="form-select" id="member_status" name="member_status">
+                                        <option value="ativo" {% if member.status == 'ativo' %}selected{% endif %}>
+                                            <i class="fas fa-check-circle text-success"></i> Ativo
+                                        </option>
+                                        <option value="inativo" {% if member.status == 'inativo' %}selected{% endif %}>
+                                            <i class="fas fa-times-circle text-danger"></i> Inativo
+                                        </option>
+                                    </select>
+                                {% else %}
+                                    <div class="view-mode-field">
+                                        {% if member.status == 'ativo' %}
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-check-circle me-1"></i>Ativo
+                                            </span>
+                                        {% elif member.status == 'inativo' %}
+                                            <span class="badge bg-danger">
+                                                <i class="fas fa-times-circle me-1"></i>Inativo
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">{{ member.status|default:'N/A' }}</span>
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    {% if is_new %}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Password *</label>
+                                <input type="password" class="form-control" id="password" name="password" required>
+                                <small class="text-muted">Password para acesso ao sistema</small>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Botões de Ação (apenas em modo de edição) -->
+                {% if is_edit_mode or is_new %}
+                <div class="form-section">
+                    <div class="d-flex justify-content-between">
+                        <a href="{% if is_new %}{% url 'manager_members' %}{% else %}{% url 'manager_member_detail' member.memberid %}{% endif %}" 
+                           class="btn btn-secondary">
+                            <i class="fas fa-times me-2"></i>Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-save me-2"></i>
+                            {% if is_new %}Criar Membro{% else %}Salvar Alterações{% endif %}
+                        </button>
+                    </div>
+                </div>
+                {% endif %}
+            </form>
+        </div>
+
+        <!-- Painel Lateral -->
+        <div class="col-md-4">
+            <div class="action-buttons">
+                <h5>Ações</h5>
+                
+                {% if not is_new %}
+                    {% if not is_edit_mode %}
+                        <a href="{% url 'manager_member_detail' member.memberid %}?edit=true" 
+                           class="btn btn-warning w-100 mb-2">
+                            <i class="fas fa-edit me-2"></i>Editar Membro
+                        </a>
+                    {% endif %}
+                    
+                    <a href="{% url 'manager_members' %}" class="btn btn-outline-secondary w-100 mb-2">
+                        <i class="fas fa-arrow-left me-2"></i>Voltar à Lista
+                    </a>
+                    
+                    <hr>
+                    <div class="text-center">
+                        <h6>Informações Rápidas</h6>
+                        <p class="mb-1"><strong>ID:</strong> #{{ member.memberid }}</p>
+                        <p class="mb-1"><strong>Plano:</strong> 
+                            <span class="badge badge-tag badge-{{ member.plan_name|lower }}">
+                                {{ member.plan_name|default:'N/A' }}
+                            </span>
+                        </p>
+                        <p class="mb-1"><strong>Status:</strong>
+                            <span class="badge badge-tag badge-{{ member.status|lower }}">
+                                {{ member.status|title }}
+                            </span>
+                        </p>
+                        <p class="mb-0"><strong>Registo:</strong> {{ member.member_registration_date|date:"d/m/Y" }}</p>
+                    </div>
+                {% else %}
+                    <p class="text-muted text-center">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Preencha o formulário para criar um novo membro
+                    </p>
+                    
+                    <a href="{% url 'manager_members' %}" class="btn btn-outline-secondary w-100">
+                        <i class="fas fa-arrow-left me-2"></i>Voltar à Lista
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Script para melhorar UX do formulário
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-format NIF
+    const nifInput = document.getElementById('nif');
+    if (nifInput) {
+        nifInput.addEventListener('input', function() {
+            this.value = this.value.replace(/\D/g, '').substring(0, 9);
+        });
+    }
+    
+    // Auto-format telefone
+    const phoneInput = document.getElementById('phone');
+    if (phoneInput) {
+        phoneInput.addEventListener('input', function() {
+            this.value = this.value.replace(/\D/g, '').substring(0, 9);
+        });
+    }
+});
+</script>
+{% endblock %}

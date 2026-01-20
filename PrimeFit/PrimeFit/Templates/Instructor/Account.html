@@ -5,6 +5,9 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1>Minha Conta</h1>
+    <a href="{% url 'instructor_account_edit' %}" class="btn btn-primary">
+        <i class="fas fa-edit me-2"></i>Editar Perfil
+    </a>
 </div>
 
 <!-- Informações do Instrutor -->
@@ -35,6 +38,7 @@
             <div class="card-body">
                 <h5>Aulas este Mês</h5>
                 <h2>{{ monthly_info.classes_month|default:0 }}</h2>
+                <br>
             </div>
         </div>
     </div>
@@ -43,6 +47,7 @@
             <div class="card-body">
                 <h5>Alunos Atendidos</h5>
                 <h2>{{ monthly_info.students_month|default:0 }}</h2>
+                <br>
             </div>
         </div>
     </div>
@@ -50,8 +55,18 @@
         <div class="card bg-warning text-white">
             <div class="card-body">
                 <h5>Avaliação Média</h5>
-                <h2>4.8</h2>
-                <small>⭐⭐⭐⭐⭐</small>
+                <h2>{{ instructor_average_rating|floatformat:1|default:"N/A" }}</h2>
+                <small>
+                    {% if instructor_average_rating %}
+                        {% if instructor_average_rating >= 1 %}⭐{% else %}☆{% endif %}
+                        {% if instructor_average_rating >= 2 %}⭐{% else %}☆{% endif %}
+                        {% if instructor_average_rating >= 3 %}⭐{% else %}☆{% endif %}
+                        {% if instructor_average_rating >= 4 %}⭐{% else %}☆{% endif %}
+                        {% if instructor_average_rating >= 5 %}⭐{% else %}☆{% endif %}
+                    {% else %}
+                        Sem avaliações
+                    {% endif %}
+                </small>
             </div>
         </div>
     </div>
@@ -60,6 +75,7 @@
             <div class="card-body">
                 <h5>Horas Trabalhadas</h5>
                 <h2>{{ monthly_info.hours_month|default:0|floatformat:0 }}h</h2>
+                <br>
             </div>
         </div>
     </div>
@@ -160,48 +176,36 @@
         <h5>Avaliações Recentes dos Alunos</h5>
     </div>
     <div class="card-body">
-        <div class="row">
-            <div class="col-md-6">
-                <div class="border rounded p-3 mb-3">
-                    <div class="d-flex justify-content-between">
-                        <strong>Maria Santos</strong>
-                        <span class="text-warning">⭐⭐⭐⭐⭐</span>
+        {% if recent_evaluations %}
+            <div class="row">
+                {% for evaluation in recent_evaluations %}
+                <div class="col-md-6">
+                    <div class="border rounded p-3 mb-3">
+                        <div class="d-flex justify-content-between">
+                            <strong>{{ evaluation.member_name|default:"Membro Anônimo" }}</strong>
+                            <span class="text-warning">
+                                {% for i in "12345" %}
+                                    {% if forloop.counter <= evaluation.rating %}⭐{% else %}☆{% endif %}
+                                {% endfor %}
+                            </span>
+                        </div>
+                        <small class="text-muted">{{ evaluation.class_name|default:"Aula" }} - {{ evaluation.date|date:"d/m/Y H:i" }}</small>
+                        {% if evaluation.comment %}
+                            <p class="mt-2">"{{ evaluation.comment }}"</p>
+                        {% else %}
+                            <p class="mt-2 text-muted"><em>Sem comentário</em></p>
+                        {% endif %}
                     </div>
-                    <small class="text-muted">Aula de Yoga - 28/10/2024</small>
-                    <p class="mt-2">"Excelente aula! A Ana tem uma energia incrível e consegue transmitir muita calma e foco."</p>
                 </div>
+                {% endfor %}
             </div>
-            <div class="col-md-6">
-                <div class="border rounded p-3 mb-3">
-                    <div class="d-flex justify-content-between">
-                        <strong>João Silva</strong>
-                        <span class="text-warning">⭐⭐⭐⭐⭐</span>
-                    </div>
-                    <small class="text-muted">Aula de Pilates - 26/10/2024</small>
-                    <p class="mt-2">"Primeira vez no Pilates e adorei! A Ana explica muito bem os exercícios."</p>
-                </div>
+        {% else %}
+            <div class="text-center text-muted p-4">
+                <i class="fas fa-star fa-3x mb-3"></i>
+                <p>Ainda não há avaliações disponíveis.</p>
+                <p>As avaliações dos seus alunos aparecerão aqui.</p>
             </div>
-            <div class="col-md-6">
-                <div class="border rounded p-3 mb-3">
-                    <div class="d-flex justify-content-between">
-                        <strong>Rita Costa</strong>
-                        <span class="text-warning">⭐⭐⭐⭐⭐</span>
-                    </div>
-                    <small class="text-muted">Aula de Zumba - 25/10/2024</small>
-                    <p class="mt-2">"Que energia! Sempre saio das aulas da Ana com um sorriso no rosto."</p>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="border rounded p-3 mb-3">
-                    <div class="d-flex justify-content-between">
-                        <strong>Carlos Mendes</strong>
-                        <span class="text-warning">⭐⭐⭐⭐⭐</span>
-                    </div>
-                    <small class="text-muted">Aula de Yoga - 24/10/2024</small>
-                    <p class="mt-2">"Técnica perfeita e muito paciente com iniciantes. Recomendo!"</p>
-                </div>
-            </div>
-        </div>
+        {% endif %}
     </div>
 </div>
 

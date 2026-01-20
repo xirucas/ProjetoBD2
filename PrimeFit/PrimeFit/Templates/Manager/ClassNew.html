@@ -19,26 +19,18 @@
             <div class="row">
                 <div class="col-md-6">
                     <div class="mb-3">
-                        <label for="class_id" class="form-label">Aula *</label>
-                        <select name="class_id" id="class_id" class="form-select" required>
+                        <label for="class_name" class="form-label">Aula *</label>
+                        <select name="class_name" id="class_name" class="form-select" required>
                             <option value="">Selecione uma aula</option>
                             {% for class in existing_classes %}
-                                <option value="{{ class.classid }}" 
+                                <option value="{{ class.name }}" 
                                         data-room="{{ class.room }}" 
                                         data-duration="{{ class.duration_minutes }}">
                                     {{ class.name }}
                                 </option>
                             {% endfor %}
-                            <option value="new">+ Criar Nova Aula</option>
                         </select>
-                    </div>
-                    
-                    <div class="mb-3" id="new_class_div" style="display: none;">
-                        <label for="new_class_name" class="form-label">Nome da Nova Aula *</label>
-                        <input type="text" name="new_class_name" id="new_class_name" class="form-control" 
-                               placeholder="Ex: Yoga Matinal">
-                    </div>
-                    
+                    </div>                
                     <div class="mb-3" id="duration_div" style="display: none;">
                         <label for="duration_minutes" class="form-label">Duração (minutos) *</label>
                         <input type="number" name="duration_minutes" id="duration_minutes" class="form-control" 
@@ -68,14 +60,7 @@
                             {% for room in rooms %}
                                 <option value="{{ room.filter_name }}">{{ room.display_text }}</option>
                             {% endfor %}
-                            <option value="new">+ Nova Sala</option>
                         </select>
-                    </div>
-                    
-                    <div class="mb-3" id="new_room_div" style="display: none;">
-                        <label for="new_room" class="form-label">Nome da Nova Sala *</label>
-                        <input type="text" name="new_room" id="new_room" class="form-control" 
-                               placeholder="Ex: Sala D">
                     </div>
                 </div>
             </div>
