@@ -1,0 +1,201 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Editar Perfil - Instrutor{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Editar Perfil</h1>
+    <a href="{% url 'instructor_account' %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left me-2"></i>Voltar
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5>Informações Pessoais</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="name" class="form-label">Nome Completo</label>
+                            <input type="text" class="form-control" id="name" name="name" 
+                                   value="{{ instructor_info.name }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" 
+                                   value="{{ instructor_info.email }}" required>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="phone" class="form-label">Telefone</label>
+                            <input type="tel" class="form-control" id="phone" name="phone" 
+                                   value="{{ instructor_info.phone }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Data de Admissão</label>
+                            <input type="text" class="form-control" 
+                                   value="{{ instructor_info.hired_at|date:'d/m/Y' }}" disabled>
+                            <small class="text-muted">Data de admissão não pode ser alterada</small>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Salvar Alterações
+                        </button>
+                        <a href="{% url 'instructor_account' %}" class="btn btn-secondary">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <!-- Card para alterar password -->
+        <div class="card">
+            <div class="card-header">
+                <h5>Alterar Password</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{% url 'instructor_change_password' %}">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="current_password" class="form-label">Password Atual</label>
+                        <input type="password" class="form-control{% if messages %}{% for message in messages %}{% if 'Password atual incorreta' in message.message %} is-invalid{% endif %}{% endfor %}{% endif %}" id="current_password" 
+                               name="current_password" required>
+                        {% if messages %}
+                            {% for message in messages %}
+                                {% if 'Password atual incorreta' in message.message %}
+                                    <div class="invalid-feedback">
+                                        Password atual incorreta
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="new_password" class="form-label">Nova Password</label>
+                        <input type="password" class="form-control" id="new_password" 
+                               name="new_password" required minlength="6">
+                        <small class="text-muted">Mínimo 6 caracteres</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="confirm_password" class="form-label">Confirmar Nova Password</label>
+                        <input type="password" class="form-control" id="confirm_password" 
+                               name="confirm_password" required minlength="6">
+                    </div>
+                    
+                    <button type="submit" class="btn btn-warning w-100">
+                        <i class="fas fa-key me-2"></i>Alterar Password
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Função para limpar erros de validação
+function clearPasswordErrors() {
+    const currentPasswordInput = document.getElementById('current_password');
+    const currentPasswordFeedback = currentPasswordInput.nextElementSibling;
+    
+    currentPasswordInput.classList.remove('is-invalid');
+    if (currentPasswordFeedback && currentPasswordFeedback.classList.contains('invalid-feedback')) {
+        currentPasswordFeedback.style.display = 'none';
+    }
+}
+
+// Função para mostrar erro na password atual
+function showCurrentPasswordError(message) {
+    const currentPasswordInput = document.getElementById('current_password');
+    let feedbackDiv = currentPasswordInput.nextElementSibling;
+    
+    currentPasswordInput.classList.add('is-invalid');
+    
+    // Criar div de feedback se não existir
+    if (!feedbackDiv || !feedbackDiv.classList.contains('invalid-feedback')) {
+        feedbackDiv = document.createElement('div');
+        feedbackDiv.className = 'invalid-feedback';
+        currentPasswordInput.parentNode.insertBefore(feedbackDiv, currentPasswordInput.nextSibling);
+    }
+    
+    feedbackDiv.textContent = message;
+    feedbackDiv.style.display = 'block';
+}
+
+// Limpar erros quando o usuário começar a digitar na password atual
+document.getElementById('current_password').addEventListener('input', function() {
+    clearPasswordErrors();
+});
+
+// Validação de confirmação de password
+document.getElementById('confirm_password').addEventListener('input', function() {
+    const newPassword = document.getElementById('new_password').value;
+    const confirmPassword = this.value;
+    
+    if (newPassword !== confirmPassword) {
+        this.setCustomValidity('As passwords não coincidem');
+    } else {
+        this.setCustomValidity('');
+    }
+});
+
+document.getElementById('new_password').addEventListener('input', function() {
+    const confirmPassword = document.getElementById('confirm_password');
+    if (confirmPassword.value && this.value !== confirmPassword.value) {
+        confirmPassword.setCustomValidity('As passwords não coincidem');
+    } else {
+        confirmPassword.setCustomValidity('');
+    }
+});
+
+// Interceptar submit do formulário de password
+document.querySelector('form[action="{% url 'instructor_change_password' %}"]').addEventListener('submit', function(e) {
+    e.preventDefault();
+    clearPasswordErrors();
+    
+    const formData = new FormData(this);
+    
+    // Fazer requisição AJAX
+    fetch("{% url 'instructor_change_password' %}", {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Sucesso - mostrar mensagem e redirecionar ou limpar formulário
+            alert('Password alterada com sucesso!');
+            this.reset();
+        } else {
+            // Erro - mostrar no campo apropriado
+            if (data.error && data.error.includes('Password atual incorreta')) {
+                showCurrentPasswordError('Password atual incorreta');
+            } else {
+                alert(data.error || 'Erro ao alterar password');
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Erro:', error);
+        alert('Erro de conexão. Tente novamente.');
+    });
+});
+</script>
+
+{% endblock %}

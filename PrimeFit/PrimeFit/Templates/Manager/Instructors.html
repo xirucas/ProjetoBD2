@@ -1,0 +1,264 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Instrutores{% endblock %}
+
+{% block extra_css %}
+<style>
+/* CSS inline para garantir carregamento dos badges */
+.badge-tag {
+    display: inline-block;
+    padding: 6px 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 4px;
+    text-align: center;
+    min-width: 70px;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: none;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.badge-ativo {
+    background-color: #28a745 !important;
+}
+
+.badge-inativo {
+    background-color: #dc3545 !important;
+}
+
+.badge-suspenso {
+    background-color: #fd7e14 !important;
+}
+
+.badge-na {
+    background-color: #e9ecef !important;
+    color: #6c757d !important;
+    border: 1px solid #dee2e6 !important;
+    font-style: italic;
+}
+
+/* Estilos para avaliação média */
+.rating-display {
+    text-align: center;
+}
+
+.rating-stars {
+    font-size: 0.9rem;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.rating-stars i {
+    margin-right: 1px;
+}
+
+.rating-display small {
+    font-size: 0.7rem;
+    margin-top: 2px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Gerenciamento de Instrutores</h1>
+    <a href="{% url 'manager_instructor_new' %}" class="btn btn-primary">
+        <i class="fas fa-plus me-2"></i>Novo Instrutor
+    </a>
+</div>
+
+<!-- Filtros e Pesquisa -->
+<form method="get" class="row mb-4" id="filterForm">
+    <div class="col-md-4">
+        <input type="text" name="search" class="form-control" 
+               placeholder="Pesquisar por nome ou email..."
+               value="{{ search_query }}"
+               onchange="document.getElementById('filterForm').submit()">
+    </div>
+    <div class="col-md-2">
+        <select name="status" class="form-select" onchange="document.getElementById('filterForm').submit()">
+            <option value="todos" {% if status_filter == 'todos' or not status_filter %}selected{% endif %}>Todos os Status</option>
+            <option value="true" {% if status_filter == 'true' %}selected{% endif %}>Ativo</option>
+            <option value="false" {% if status_filter == 'false' %}selected{% endif %}>Inativo</option>
+        </select>
+    </div>
+</form>
+
+<!-- Tabela de Instrutores -->
+<div class="card">
+    <div class="card-header">
+        <h5>Lista de Instrutores ({{ total_instructors }} total)</h5>
+    </div>
+    <div class="card-body">
+        {% if instructors %}
+        <table class="table table-striped table-hover instructors-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nome</th>
+                    <th>Email</th>
+                    <th>Telefone</th>
+                    <th>NIF</th>
+                    <th>Status</th>
+                    <th>Avaliação Média</th>
+                    <th>Data Contratação</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for instructor in instructors %}
+                <tr>
+                    <td><strong>#{{ instructor.instructorid }}</strong></td>
+                    <td>{{ instructor.name }}</td>
+                    <td>{{ instructor.email }}</td>
+                    <td>{{ instructor.phone }}</td>
+                    <td>{{ instructor.nif }}</td>
+                    <td>
+                        {% if instructor.isactive %}
+                            <span class="badge badge-tag badge-ativo">
+                                Ativo
+                            </span>
+                        {% else %}
+                            <span class="badge badge-tag badge-inativo">
+                                Inativo
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if instructor.average_rating > 0 %}
+                            <div class="">
+                                <span class="badge text-dark fs-6 px-2 py-1">
+                                    {{ instructor.average_rating|floatformat:1 }}/5
+                                </span>
+                            </div>
+                        {% else %}
+                            <small class="text-muted">
+                                <i class="fas fa-minus"></i> Sem avaliações
+                            </small>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <small class="text-muted">
+                            {{ instructor.hired_at|date:"d/m/Y" }}
+                        </small>
+                    </td>
+                    <td>
+                        <a href="{% url 'manager_instructor_detail' instructor.instructorid %}" 
+                           class="btn btn-sm btn-outline-primary action-btn" title="Ver detalhes">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        <a href="{% url 'manager_instructor_detail' instructor.instructorid %}?edit=true" 
+                           class="btn btn-sm btn-outline-warning action-btn" title="Editar">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="9" class="text-center py-4">
+                        <i class="fas fa-users text-muted mb-2" style="font-size: 2rem;"></i>
+                        <p class="text-muted">Nenhum instrutor encontrado.</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i> Nenhum instrutor encontrado com os filtros aplicados.
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Paginação Estilizada -->
+    {% if instructors.has_other_pages %}
+    <div class="card-footer">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center">
+            <!-- Informações da página atual -->
+            <div class="pagination-info mb-2 mb-md-0">
+                <i class="fas fa-info-circle me-1"></i>
+                Página {{ instructors.number }} de {{ instructors.paginator.num_pages }} 
+                ({{ instructors.paginator.count }} instrutores)
+            </div>
+            
+            <!-- Paginação com números -->
+            <div class="primefit-pagination">
+                <nav aria-label="Paginação de instrutores">
+                    <ul class="pagination mb-0">
+                        
+                        <!-- Primeiro << -->
+                        {% if instructors.number > 1 %}
+                            <li class="page-item">
+                                <a class="page-link page-nav" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page=1" title="Primeira página">
+                                    &laquo;&laquo;
+                                </a>
+                            </li>
+                        {% endif %}
+                        
+                        <!-- Números das páginas -->
+                        {% for num in instructors.paginator.page_range %}
+                            {% if num == instructors.number %}
+                                <!-- Página atual (ativa) -->
+                                <li class="page-item active">
+                                    <span class="page-link">{{ num }}</span>
+                                </li>
+                            {% elif num == 1 or num == instructors.paginator.num_pages %}
+                                <!-- Primeira e última página sempre visíveis -->
+                                <li class="page-item">
+                                    <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ num }}">{{ num }}</a>
+                                </li>
+                            {% elif num >= instructors.number|add:"-2" and num <= instructors.number|add:"2" %}
+                                <!-- Páginas próximas à atual (±2) -->
+                                <li class="page-item">
+                                    <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ num }}">{{ num }}</a>
+                                </li>
+                            {% elif num == 2 and instructors.number > 4 %}
+                                <!-- Reticências após a primeira página -->
+                                <li class="page-item">
+                                    <span class="page-ellipsis">...</span>
+                                </li>
+                            {% elif num == instructors.paginator.num_pages|add:"-1" and instructors.number < instructors.paginator.num_pages|add:"-3" %}
+                                <!-- Reticências antes da última página -->
+                                <li class="page-item">
+                                    <span class="page-ellipsis">...</span>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        <!-- Último >> -->
+                        {% if instructors.number < instructors.paginator.num_pages %}
+                            <li class="page-item">
+                                <a class="page-link page-nav" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ instructors.paginator.num_pages }}" title="Última página">
+                                    &raquo;&raquo;
+                                </a>
+                            </li>
+                        {% endif %}
+                        
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    // Auto-submit do formulário quando houver mudanças nos filtros
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.querySelector('input[name="search"]');
+        let searchTimeout;
+        
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(function() {
+                    document.getElementById('filterForm').submit();
+                }, 500); // Aguarda 500ms após parar de digitar
+            });
+        }
+    }); 
+</script>
+{% endblock %}

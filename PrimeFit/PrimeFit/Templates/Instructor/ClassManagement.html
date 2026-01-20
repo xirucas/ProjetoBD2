@@ -14,6 +14,7 @@
             <div class="card-body">
                 <h5>Aulas Hoje</h5>
                 <h2>{{ dashboard_stats.classes_today }}</h2>
+                <br>
             </div>
         </div>
     </div>
@@ -21,7 +22,7 @@
         <div class="card bg-success text-white">
             <div class="card-body">
                 <h5>Alunos Confirmados</h5>
-                <h2>{{ dashboard_stats.students_today }}</h2>
+                <h2>{{ dashboard_stats.students_confirmed }}</h2>
                 <small>Para hoje</small>
             </div>
         </div>
@@ -68,7 +69,7 @@
                     <div class="card-body">
                         <h5>{{ class.class_name }}</h5>
                         <p><strong>Sala:</strong> {{ class.room }}</p>
-                        <p><strong>Inscritos:</strong> {{ class.enrolled }}/{{ class.capacity }}</p>
+                        <p><strong>Inscritos:</strong> {{ class.enrolled_students }}/{{ class.maxparticipants }}</p>
                     </div>
                 </div>
             </div>
@@ -85,7 +86,7 @@
 <!-- Lista de Alunos Inscritos -->
 <div class="card mb-4">
     <div class="card-header d-flex justify-content-between align-items-center">
-        <h5>{% if next_class %} Próxima Aula: {{ next_class.name }} ({{ next_class.time }}) {%else%} Nenhuma Aula Agendada {% endif %}</h5>
+        <h5>{% if dashboard_stats.next_class_time %} Próxima Aula: {{ dashboard_stats.next_class_name }} ({{ dashboard_stats.next_class_time }}) {%else%} Nenhuma aula agendada para o resto do dia {% endif %}</h5>
         <span class="badge bg-info">{{ next_class_members|length }} inscritos</span>
     </div>
     <div class="card-body">
@@ -95,7 +96,6 @@
                 <thead>
                     <tr>
                         <th>Nome</th>
-                        <th>ID Membro</th>
                         <th>Plano</th>
                     </tr>
                 </thead>
@@ -103,16 +103,15 @@
                     
                     {% for member in next_class_members %}
                     <tr>
-                        <td>{{ member.name }}</td>
-                        <td>{{ member.member_id }}</td>
-                        <td><span class="badge bg-primary">{{ member.plan }}</span></td>
+                        <td>{{ member.member_name }}</td>
+                        <td><span class="badge bg-primary">{{ member.plan_name }}</span></td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
             {% else %}
             <div class="col-md-4">
-                <td colspan="7" class="text-center text-muted">Nenhum aluno inscrito</td>
+                <td colspan="7" class="text-center text-muted">{% if dashboard_stats.next_class_time %} Nenhuma aula a seguir {%else%} Nenhum aluno inscrito {% endif %}</td>
             </div>
             {% endif %}
         </div>
@@ -135,9 +134,7 @@
                         <th>Aula</th>
                         <th>Sala</th>
                         <th>Inscritos</th>
-                        <th>Presentes</th>
                         <th>Taxa</th>
-                        <th>Status</th>
                         <th>Ações</th>
                     </tr>
                 </thead>
@@ -148,11 +145,10 @@
                         <td>{{ class.schedule }}</td>
                         <td>{{ class.class_name }}</td>
                         <td>{{ class.room }}</td>
-                        <td>{{ class.enrolled_students }}</td>
-                        <td>{{ class.present_students }}</td>
-                        <td>{{ class.attendance_rate }}</td>
+                        <td>{{ class.enrolled }}</td>
+                        <td>{{ class.rate }}</td>
                         <td>
-                            <button class="btn btn-sm btn-outline-primary">Ver</button>
+                            <button class="btn btn-sm btn-outline-primary" onclick="viewEvaluations('{{ class.class_name }}')">Ver Avaliação</button>
                         </td>
                     </tr>
                     {% endfor %}
@@ -164,31 +160,117 @@
             </div>
             {% endif %}
         </div>
-        
-        <!-- Resumo da Performance -->
-        <div class="row mt-4">
-            <div class="col-md-6">
-                <div class="card bg-light">
-                    <div class="card-body">
-                        <h6>Performance da Semana</h6>
-                        <p><strong>Total de Aulas:</strong> {{ weekly_performance.total_classes }}</p>
-                        <p><strong>Total de Alunos:</strong> {{ weekly_performance.total_students }}</p>
-                        <p><strong>Taxa Média de Presença:</strong> {{ weekly_performance.average_attendance }}%</p>
-                        <p><strong>Avaliação Média:</strong> TBD/5.0</p>
+    </div>
+</div>
+
+<!-- Modal para Avaliações -->
+<div class="modal fade" id="evaluationsModal" tabindex="-1" aria-labelledby="evaluationsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="evaluationsModalLabel">Avaliações da Aula</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="evaluationsContent">
+                <div class="text-center">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Carregando...</span>
                     </div>
+                    <p class="mt-2">Carregando avaliações...</p>
                 </div>
             </div>
-            <div class="col-md-6">
-                <div class="card bg-light">
-                    <div class="card-body">
-                        <h6>Aulas Mais Populares</h6>
-                        {% for class in popular_classes %}
-                        <p><strong>{{ forloop.counter }}º {{ class.class_name }}:</strong> {{ class.occupation_rate }}% ocupação</p>
-                        {% endfor %}
-                    </div>
-                </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+function viewEvaluations(className) {
+    // Limpar conteúdo anterior e mostrar loading
+    document.getElementById('evaluationsContent').innerHTML = `
+        <div class="text-center">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Carregando...</span>
+            </div>
+            <p class="mt-2">Carregando avaliações...</p>
+        </div>
+    `;
+    
+    // Mostrar o modal
+    const modal = new bootstrap.Modal(document.getElementById('evaluationsModal'));
+    modal.show();
+    
+    // Buscar avaliações via AJAX
+    fetch(`/instructor/class-evaluations/${encodeURIComponent(className)}/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                displayEvaluations(data);
+            } else {
+                showError(data.error || 'Erro ao carregar avaliações');
+            }
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            showError('Erro de conexão. Tente novamente.');
+        });
+}
+
+function displayEvaluations(data) {
+    const content = document.getElementById('evaluationsContent');
+    
+    if (data.evaluations.length === 0) {
+        content.innerHTML = `
+            <div class="text-center text-muted p-4">
+                <i class="fas fa-star fa-3x mb-3"></i>
+                <h5>Nenhuma avaliação encontrada</h5>
+                <p>Esta aula ainda não foi avaliada pelos alunos.</p>
+            </div>
+        `;
+        return;
+    }
+    
+    let html = `
+        <div class="mb-3">
+            <h6><strong>Aula:</strong> ${data.class_name}</h6>
+            <p class="text-muted">Total de avaliações: ${data.total}</p>
+        </div>
+        <div class="row">
+    `;
+    
+    data.evaluations.forEach(eval => {
+        const stars = '★'.repeat(eval.rating) + '☆'.repeat(5 - eval.rating);
+        
+        html += `
+            <div class="col-md-6 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <strong>${eval.member_name}</strong>
+                            <span class="text-warning fs-5">${stars}</span>
+                        </div>
+                        <small class="text-muted">${eval.date}</small>
+                        ${eval.comment ? `<p class="mt-2 mb-0">"${eval.comment}"</p>` : '<p class="mt-2 mb-0 text-muted"><em>Sem comentário</em></p>'}
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    html += '</div>';
+    content.innerHTML = html;
+}
+
+function showError(message) {
+    document.getElementById('evaluationsContent').innerHTML = `
+        <div class="alert alert-danger text-center">
+            <i class="fas fa-exclamation-triangle mb-2"></i>
+            <p class="mb-0">${message}</p>
+        </div>
+    `;
+}
+</script>
+
 {% endblock %}

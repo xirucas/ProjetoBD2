@@ -16,7 +16,7 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between">
                     <div>
-                        <h4>324</h4>
+                        <h4>{{ total_members }}</h4>
                         <p>Total Membros</p>
                     </div>
                     <div class="align-self-center">
@@ -31,7 +31,7 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between">
                     <div>
-                        <h4>47</h4>
+                        <h4>{{ today_checkins_count }}</h4>
                         <p>Check-ins Hoje</p>
                     </div>
                     <div class="align-self-center">
@@ -46,7 +46,7 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between">
                     <div>
-                        <h4>12</h4>
+                        <h4>{{ today_classes }}</h4>
                         <p>Aulas Hoje</p>
                     </div>
                     <div class="align-self-center">
@@ -61,7 +61,7 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between">
                     <div>
-                        <h4>€18,750</h4>
+                        <h4>€{{ monthly_revenue|floatformat:0 }}</h4>
                         <p>Receita Mensal</p>
                     </div>
                     <div class="align-self-center">
@@ -92,34 +92,25 @@
                         </tr>
                     </thead>
                     <tbody>
+                        {% for checkin in recent_checkins %}
                         <tr>
-                            <td>1001</td>
-                            <td>Maria Silva (ID: 205)</td>
-                            <td>09:15</td>
-                            <td>10:45</td>
-                            <td><span class="badge bg-success">Finalizado</span></td>
+                            <td>{{ checkin.checkinid }}</td>
+                            <td>{{ checkin.member_name }} (ID: {{ checkin.memberid }})</td>
+                            <td>{{ checkin.entrancetime|time:"H:i" }}</td>
+                            <td>{% if checkin.exittime %}{{ checkin.exittime|time:"H:i" }}{% else %}-{% endif %}</td>
+                            <td>
+                                {% if checkin.status == 'Finalizado' %}
+                                    <span class="badge bg-success">Finalizado</span>
+                                {% else %}
+                                    <span class="badge bg-warning">Ativo</span>
+                                {% endif %}
+                            </td>
                         </tr>
+                        {% empty %}
                         <tr>
-                            <td>1002</td>
-                            <td>João Santos (ID: 187)</td>
-                            <td>08:30</td>
-                            <td>-</td>
-                            <td><span class="badge bg-warning">Ativo</span></td>
+                            <td colspan="5" class="text-center">Nenhum check-in hoje</td>
                         </tr>
-                        <tr>
-                            <td>1003</td>
-                            <td>Ana Costa (ID: 156)</td>
-                            <td>07:45</td>
-                            <td>09:15</td>
-                            <td><span class="badge bg-success">Finalizado</span></td>
-                        </tr>
-                        <tr>
-                            <td>1004</td>
-                            <td>Pedro Lima (ID: 298)</td>
-                            <td>19:20</td>
-                            <td>-</td>
-                            <td><span class="badge bg-warning">Ativo</span></td>
-                        </tr>
+                        {% endfor %}
                     </tbody>
                 </table>
             </div>
@@ -131,30 +122,19 @@
                 <h5>Próximas Aulas</h5>
             </div>
             <div class="card-body">
-                <div class="mb-3 border-bottom pb-2">
-                    <strong>Yoga Matinal</strong><br>
-                    <small class="text-muted">10:00-11:00 | Sala A</small><br>
-                    <small>Instrutor: Ana Ferreira (ID: 15)</small><br>
-                    <small class="text-success">8/15 inscritos</small>
+                {% for class in upcoming_classes %}
+                <div class="mb-3 {% if not forloop.last %}border-bottom pb-2{% endif %}">
+                    <strong>{{ class.class_name }}</strong><br>
+                    <small class="text-muted">{{ class.starttime|time:"H:i" }}-{{ class.endtime|time:"H:i" }} | {{ class.room }}</small><br>
+                    <small>Instrutor: {{ class.instructor_name }} (ID: {{ class.instructorid }})</small><br>
+                    <small class="{% if class.is_full %}text-warning{% else %}text-success{% endif %}">
+                        {{ class.enrolled_count }}/{{ class.maxcapacity }} inscritos
+                        {% if class.is_full %} (Lotado){% endif %}
+                    </small>
                 </div>
-                <div class="mb-3 border-bottom pb-2">
-                    <strong>CrossFit Intenso</strong><br>
-                    <small class="text-muted">11:30-12:30 | Sala B</small><br>
-                    <small>Instrutor: Carlos Mendes (ID: 22)</small><br>
-                    <small class="text-warning">12/12 inscritos (Lotado)</small>
-                </div>
-                <div class="mb-3 border-bottom pb-2">
-                    <strong>Pilates</strong><br>
-                    <small class="text-muted">14:00-15:00 | Sala A</small><br>
-                    <small>Instrutor: Sofia Reis (ID: 18)</small><br>
-                    <small class="text-success">5/10 inscritos</small>
-                </div>
-                <div class="mb-3">
-                    <strong>Spinning</strong><br>
-                    <small class="text-muted">18:00-19:00 | Sala C</small><br>
-                    <small>Instrutor: Miguel Torres (ID: 31)</small><br>
-                    <small class="text-success">6/20 inscritos</small>
-                </div>
+                {% empty %}
+                <p class="text-center text-muted">Nenhuma aula agendada para hoje</p>
+                {% endfor %}
             </div>
         </div>
     </div>

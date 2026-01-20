@@ -6,8 +6,9 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1>Gerenciamento de Pagamentos</h1>
     <div class="d-flex gap-2">
-        <button class="btn btn-success">+ Novo Pagamento</button>
-        <button class="btn btn-info">Relatório Financeiro</button>
+        <a href="{% url 'manager_financial_report' %}" class="btn btn-info">
+            <i class="fas fa-chart-line"></i> Relatório Financeiro
+        </a>
     </div>
 </div>
 
@@ -17,8 +18,8 @@
         <div class="card bg-success text-white">
             <div class="card-body">
                 <h5>Receita Mensal</h5>
-                <h2>€18.750</h2>
-                <small>+12% vs mês anterior</small>
+                <h2>€{{ dashboard_summary.receita_mensal|floatformat:0 }}</h2>
+                <small> </small>
             </div>
         </div>
     </div>
@@ -26,8 +27,8 @@
         <div class="card bg-primary text-white">
             <div class="card-body">
                 <h5>Pagamentos Hoje</h5>
-                <h2>€1.250</h2>
-                <small>15 transações</small>
+                <h2>€{{ dashboard_summary.pagamentos_hoje|floatformat:0 }}</h2>
+                <small>{{ dashboard_summary.transacoes_hoje }} transações</small>
             </div>
         </div>
     </div>
@@ -35,8 +36,8 @@
         <div class="card bg-warning text-white">
             <div class="card-body">
                 <h5>Pendentes</h5>
-                <h2>€890</h2>
-                <small>8 pagamentos</small>
+                <h2>€{{ dashboard_summary.pendentes|floatformat:0 }}</h2>
+                <small>{{ dashboard_summary.pagamentos_pendentes }} pagamentos</small>
             </div>
         </div>
     </div>
@@ -44,42 +45,41 @@
         <div class="card bg-danger text-white">
             <div class="card-body">
                 <h5>Em Atraso</h5>
-                <h2>€315</h2>
-                <small>3 membros</small>
+                <h2>€{{ dashboard_summary.em_atraso|floatformat:0 }}</h2>
+                <small>{{ dashboard_summary.pagamentos_em_atraso }} membros</small>
             </div>
         </div>
     </div>
 </div>
 
 <!-- Filtros -->
+<form method="GET" action="{% url 'manager_payments' %}">
 <div class="row mb-4">
     <div class="col-md-2">
-        <select class="form-select">
-            <option>Todos os Status</option>
-            <option>Pago</option>
-            <option>Pendente</option>
-            <option>Em Atraso</option>
-            <option>Cancelado</option>
+        <select class="form-select" name="status" onchange="this.form.submit()">
+            {% for status in status_options %}
+                <option value="{{ status }}" {% if status == status_filter %}selected{% endif %}>{{ status }}</option>
+            {% endfor %}
         </select>
     </div>
     <div class="col-md-2">
-        <select class="form-select">
-            <option>Todos os Planos</option>
-            <option>Básico</option>
-            <option>Premium</option>
-            <option>VIP</option>
+        <select class="form-select" name="plano" onchange="this.form.submit()">
+            {% for plano in plano_options %}
+                <option value="{{ plano }}" {% if plano == plano_filter %}selected{% endif %}>{{ plano }}</option>
+            {% endfor %}
         </select>
     </div>
     <div class="col-md-2">
-        <input type="date" class="form-control" value="2024-10-01">
+        <input type="date" class="form-control" name="data_inicio" value="{{ data_inicio }}" onchange="this.form.submit()">
     </div>
     <div class="col-md-2">
-        <input type="date" class="form-control" value="2024-10-30">
+        <input type="date" class="form-control" name="data_fim" value="{{ data_fim }}" onchange="this.form.submit()">
     </div>
-    <div class="col-md-4">
-        <input type="text" class="form-control" placeholder="Buscar por nome ou ID do membro...">
+    <div class="col-md-3">
+        <input type="text" class="form-control" placeholder="Buscar por nome ou ID do membro..." name="search" value="{{ search_query }}">
     </div>
 </div>
+</form>
 
 <!-- Pagamentos Recentes -->
 <div class="card mb-4">
@@ -88,24 +88,20 @@
     </div>
     <div class="card-body">
         <div class="row">
-            <div class="col-md-4">
-                <div class="alert alert-success" role="alert">
-                    <strong>€45.00 - Ana Costa (ID: 1001)</strong><br>
-                    <small>Plano Premium | 14:25 | Cartão **** 1234</small>
+            {% for transaction in recent_transactions %}
+                <div class="col-md-4">
+                    <div class="alert {% if 'Pendente' in transaction.status or 'Em Atraso' in transaction.status %}alert-warning{% else %}alert-success{% endif %}" role="alert">
+                        <strong>{{ transaction.valor }} - {{ transaction.nome_membro }} ({{ transaction.id_membro }})</strong><br>
+                        <small>{{ transaction.plano }} | {{ transaction.data_pagamento|date:"d/m/Y" }} | {{ transaction.metodo_pagamento }}</small>
+                    </div>
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="alert alert-success" role="alert">
-                    <strong>€25.00 - João Silva (ID: 1005)</strong><br>
-                    <small>Plano Básico | 13:50 | Dinheiro</small>
+            {% empty %}
+                <div class="col-12">
+                    <div class="alert alert-info" role="alert">
+                        <strong>Nenhuma transação recente hoje</strong>
+                    </div>
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="alert alert-warning" role="alert">
-                    <strong>€65.00 - Maria Santos (ID: 1012)</strong><br>
-                    <small>Plano VIP | Pendente | Transferência</small>
-                </div>
-            </div>
+            {% endfor %}
         </div>
     </div>
 </div>
@@ -113,7 +109,7 @@
 <!-- Histórico de Pagamentos -->
 <div class="card">
     <div class="card-header">
-        <h5>Histórico de Pagamentos - Outubro 2024</h5>
+        <h5>Histórico de Pagamentos - {{ data_inicio_obj|date:"d/m/Y" }} a {{ data_fim_obj|date:"d/m/Y" }}</h5>
     </div>
     <div class="card-body">
         <div class="table-responsive">
@@ -129,174 +125,86 @@
                         <th>Data Vencimento</th>
                         <th>Data Pagamento</th>
                         <th>Status</th>
-                        <th>Ações</th>
                     </tr>
                 </thead>
                 <tbody>
+                    {% for payment in payments_page %}
                     <tr>
-                        <td>PAY-2024-001</td>
-                        <td>Ana Costa</td>
-                        <td>1001</td>
-                        <td><span class="badge bg-warning">Premium</span></td>
-                        <td>€45.00</td>
-                        <td>Cartão</td>
-                        <td>30/10/2024</td>
-                        <td>30/10/2024</td>
-                        <td><span class="badge bg-success">Pago</span></td>
+                        <td>PAY-{{ payment.paymentid }}</td>
+                        <td>{{ payment.nome_membro }}</td>
+                        <td>{{ payment.id_membro }}</td>
                         <td>
-                            <button class="btn btn-sm btn-outline-primary">Ver</button>
-                            <button class="btn btn-sm btn-outline-secondary">Recibo</button>
+                            {% if 'Básico' in payment.plano %}
+                                <span class="badge bg-primary">{{ payment.plano }}</span>
+                            {% elif 'Premium' in payment.plano %}
+                                <span class="badge bg-warning">{{ payment.plano }}</span>
+                            {% elif 'VIP' in payment.plano %}
+                                <span class="badge bg-danger">{{ payment.plano }}</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ payment.plano }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ payment.valor }}</td>
+                        <td>{{ payment.metodo_pagamento }}</td>
+                        <td>{{ payment.data_vencimento|date:"d/m/Y" }}</td>
+                        <td>{% if payment.data_pagamento %}{{ payment.data_pagamento|date:"d/m/Y" }}{% else %}-{% endif %}</td>
+                        <td>
+                            {% if payment.status == 'Pago' %}
+                                <span class="badge bg-success">{{ payment.status }}</span>
+                            {% elif payment.status == 'Pendente' %}
+                                <span class="badge bg-warning">{{ payment.status }}</span>
+                            {% elif payment.status == 'Em Atraso' %}
+                                <span class="badge bg-danger">{{ payment.status }}</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ payment.status }}</span>
+                            {% endif %}
                         </td>
                     </tr>
+                    {% empty %}
                     <tr>
-                        <td>PAY-2024-002</td>
-                        <td>Carlos Silva</td>
-                        <td>1005</td>
-                        <td><span class="badge bg-primary">Básico</span></td>
-                        <td>€25.00</td>
-                        <td>Dinheiro</td>
-                        <td>28/10/2024</td>
-                        <td>30/10/2024</td>
-                        <td><span class="badge bg-success">Pago</span></td>
-                        <td>
-                            <button class="btn btn-sm btn-outline-primary">Ver</button>
-                            <button class="btn btn-sm btn-outline-secondary">Recibo</button>
-                        </td>
+                        <td colspan="10" class="text-center">Nenhum pagamento encontrado</td>
                     </tr>
-                    <tr>
-                        <td>PAY-2024-003</td>
-                        <td>Fernanda Lopes</td>
-                        <td>1012</td>
-                        <td><span class="badge bg-danger">VIP</span></td>
-                        <td>€65.00</td>
-                        <td>Transferência</td>
-                        <td>25/10/2024</td>
-                        <td>27/10/2024</td>
-                        <td><span class="badge bg-success">Pago</span></td>
-                        <td>
-                            <button class="btn btn-sm btn-outline-primary">Ver</button>
-                            <button class="btn btn-sm btn-outline-secondary">Recibo</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>PAY-2024-004</td>
-                        <td>Miguel Torres</td>
-                        <td>1018</td>
-                        <td><span class="badge bg-primary">Básico</span></td>
-                        <td>€25.00</td>
-                        <td>MB Way</td>
-                        <td>30/10/2024</td>
-                        <td>-</td>
-                        <td><span class="badge bg-warning">Pendente</span></td>
-                        <td>
-                            <button class="btn btn-sm btn-outline-primary">Ver</button>
-                            <button class="btn btn-sm btn-outline-warning">Cobrar</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>PAY-2024-005</td>
-                        <td>Sofia Reis</td>
-                        <td>1025</td>
-                        <td><span class="badge bg-warning">Premium</span></td>
-                        <td>€45.00</td>
-                        <td>Cartão</td>
-                        <td>22/10/2024</td>
-                        <td>24/10/2024</td>
-                        <td><span class="badge bg-success">Pago</span></td>
-                        <td>
-                            <button class="btn btn-sm btn-outline-primary">Ver</button>
-                            <button class="btn btn-sm btn-outline-secondary">Recibo</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>PAY-2024-006</td>
-                        <td>João Ferreira</td>
-                        <td>1030</td>
-                        <td><span class="badge bg-danger">VIP</span></td>
-                        <td>€65.00</td>
-                        <td>Dinheiro</td>
-                        <td>20/10/2024</td>
-                        <td>21/10/2024</td>
-                        <td><span class="badge bg-success">Pago</span></td>
-                        <td>
-                            <button class="btn btn-sm btn-outline-primary">Ver</button>
-                            <button class="btn btn-sm btn-outline-secondary">Recibo</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>PAY-2024-007</td>
-                        <td>Pedro Oliveira</td>
-                        <td>1035</td>
-                        <td><span class="badge bg-primary">Básico</span></td>
-                        <td>€25.00</td>
-                        <td>Transferência</td>
-                        <td>15/10/2024</td>
-                        <td>-</td>
-                        <td><span class="badge bg-danger">Em Atraso</span></td>
-                        <td>
-                            <button class="btn btn-sm btn-outline-primary">Ver</button>
-                            <button class="btn btn-sm btn-outline-danger">Notificar</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>PAY-2024-008</td>
-                        <td>Rita Costa</td>
-                        <td>1040</td>
-                        <td><span class="badge bg-warning">Premium</span></td>
-                        <td>€45.00</td>
-                        <td>MB Way</td>
-                        <td>18/10/2024</td>
-                        <td>-</td>
-                        <td><span class="badge bg-warning">Pendente</span></td>
-                        <td>
-                            <button class="btn btn-sm btn-outline-primary">Ver</button>
-                            <button class="btn btn-sm btn-outline-warning">Cobrar</button>
-                        </td>
-                    </tr>
+                    {% endfor %}
                 </tbody>
             </table>
         </div>
-        
-        <!-- Resumo Financeiro -->
-        <div class="row mt-4">
-            <div class="col-md-6">
-                <div class="card bg-light">
-                    <div class="card-body">
-                        <h6>Resumo do Mês</h6>
-                        <p><strong>Total Faturado:</strong> €18.750</p>
-                        <p><strong>Total Recebido:</strong> €17.545</p>
-                        <p><strong>Pendente:</strong> €890</p>
-                        <p><strong>Em Atraso:</strong> €315</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card bg-light">
-                    <div class="card-body">
-                        <h6>Métodos de Pagamento</h6>
-                        <p><strong>Cartão:</strong> 45% (€7.912)</p>
-                        <p><strong>Dinheiro:</strong> 25% (€4.387)</p>
-                        <p><strong>Transferência:</strong> 20% (€3.510)</p>
-                        <p><strong>MB Way:</strong> 10% (€1.736)</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
+
         <!-- Paginação -->
         <nav aria-label="Navegação das páginas" class="mt-4">
             <ul class="pagination justify-content-center">
-                <li class="page-item disabled">
-                    <a class="page-link" href="#" tabindex="-1">Anterior</a>
-                </li>
-                <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                <li class="page-item"><a class="page-link" href="#">2</a></li>
-                <li class="page-item"><a class="page-link" href="#">3</a></li>
-                <li class="page-item">
-                    <a class="page-link" href="#">Próximo</a>
-                </li>
+                {% if payments_page.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ payments_page.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if plano_filter %}&plano={{ plano_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}&data_inicio={{ data_inicio }}&data_fim={{ data_fim }}">Anterior</a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" tabindex="-1">Anterior</a>
+                    </li>
+                {% endif %}
+                
+                {% for num in payments_page.paginator.page_range %}
+                    {% if payments_page.number == num %}
+                        <li class="page-item active">
+                            <a class="page-link" href="#">{{ num }}</a>
+                        </li>
+                    {% elif num > payments_page.number|add:'-3' and num < payments_page.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if plano_filter %}&plano={{ plano_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}&data_inicio={{ data_inicio }}&data_fim={{ data_fim }}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if payments_page.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ payments_page.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if plano_filter %}&plano={{ plano_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}&data_inicio={{ data_inicio }}&data_fim={{ data_fim }}">Próximo</a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" tabindex="-1">Próximo</a>
+                    </li>
+                {% endif %}
             </ul>
-        </nav>
+        </nav>        
     </div>
 </div>
 {% endblock %}
